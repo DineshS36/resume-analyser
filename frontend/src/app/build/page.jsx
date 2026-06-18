@@ -69,6 +69,13 @@ export default function BuildResume() {
     }
   }, [authLoading, isAuthenticated, router]);
 
+  const updateResumeData = useCallback((section, data) => {
+    setResumeData(prev => ({
+      ...prev,
+      [section]: data,
+    }));
+  }, []);
+
   // Show loading while checking auth
   if (authLoading || !isAuthenticated) {
     return (
@@ -81,12 +88,6 @@ export default function BuildResume() {
     );
   }
 
-  const updateResumeData = useCallback((section, data) => {
-    setResumeData(prev => ({
-      ...prev,
-      [section]: data,
-    }));
-  }, []);
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
