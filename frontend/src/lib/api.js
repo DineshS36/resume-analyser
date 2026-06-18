@@ -99,6 +99,24 @@ export const generateCoverLetter = async (personalInfo, targetJobTitle, summary,
   }
 };
 
+export const parseResumePDF = async (file) => {
+  try {
+    const formData = new FormData();
+    formData.append('resume', file);
+
+    const response = await api.post('/api/parse-pdf', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error parsing resume PDF:', error);
+    throw error;
+  }
+};
+
+
 // Resume API endpoints
 
 export const createResume = async (title, templateId = 'classic') => {

@@ -310,11 +310,164 @@ Write a cover letter for this candidate applying to the ${targetJobTitle} positi
 }
 
 // ---------------------------------------------------------------------------
+// 5. Parse Resume PDF  (Multimodal — inlineData + Structured Output)
+// ---------------------------------------------------------------------------
+const PARSE_PDF_SYSTEM_PROMPT = `You are an expert resume parser. You will receive a PDF resume. Extract ALL information from it and return structured JSON. Be thorough — capture every detail including full name, contact info, work experiences, education, and skills. For dates, use the format as written in the resume (e.g., "Jan 2020", "2020-01", "January 2020"). If a field is not found in the resume, return an empty string or empty array as appropriate.`;
+
+async function parseResumePDF(base64Data) {
+  if (!ai) {
+    return {
+      personalInfo: {
+        fullName: 'John Doe (Sample)',
+        email: 'john@example.com',
+        phone: '+1 (555) 123-4567',
+        location: 'New York, NY',
+        linkedin: 'https://linkedin.com/in/johndoe',
+        targetJobTitle: 'Software Engineer',
+        summary: 'This is a sample parsed resume. Please set up your Gemini API key in the .env file to use real AI parsing.'
+      },
+      experience: [
+        {
+          company: 'Sample Company',
+          role: 'Software Engineer',
+          location: 'New York, NY',
+          startDate: 'Jan 2022',
+          endDate: 'Present',
+          description: 'Developed and maintained web applications using React and Node.js.'
+        }
+      ],
+      education: [
+        {
+          degree: 'Bachelor of Science in Computer Science',
+          institution: 'Sample University',
+          year: '2021',
+          field: 'Computer Science'
+        }
+      ],
+      skills: ['JavaScript', 'React', 'Node.js', 'Python', 'SQL']
+    };
+  }
+
+  try {
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            { text: PARSE_PDF_SYSTEM_PROMPT + '\n\nParse this resume PDF and extract all information:' },
+            {
+              inlineData: {
+                mimeType: 'application/pdf',
+                data: base64Data
+              }
+            }
+          ]
+        }
+      ],
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            personalInfo: {
+              type: Type.OBJECT,
+              description: 'Personal and contact information extracted from the resume',
+              properties: {
+                fullName: { type: Type.STRING, description: 'Full name of the candidate' },
+                email: { type: Type.STRING, description: 'Email address' },
+                phone: { type: Type.STRING, description: 'Phone number' },
+                location: { type: Type.STRING, description: 'City, State or full address' },
+                linkedin: { type: Type.STRING, description: 'LinkedIn profile URL' },
+                targetJobTitle: { type: Type.STRING, description: 'Current or most recent job title, or the title from the resume header' },
+                summary: { type: Type.STRING, description: 'Professional summary or objective statement from the resume' }
+              },
+              required: ['fullName', 'email', 'phone', 'location', 'linkedin', 'targetJobTitle', 'summary']
+            },
+            experience: {
+              type: Type.ARRAY,
+              description: 'Work experience entries',
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  company: { type: Type.STRING, description: 'Company or organization name' },
+                  role: { type: Type.STRING, description: 'Job title or role' },
+                  location: { type: Type.STRING, description: 'Location of the job' },
+                  startDate: { type: Type.STRING, description: 'Start date as written on the resume' },
+                  endDate: { type: Type.STRING, description: 'End date as written, or "Present" if current' },
+                  description: { type: Type.STRING, description: 'Full description including all bullet points, joined as a single text block' }
+                },
+                required: ['company', 'role', 'location', 'startDate', 'endDate', 'description']
+              }
+            },
+            education: {
+              type: Type.ARRAY,
+              description: 'Education entries',
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  degree: { type: Type.STRING, description: 'Degree name (e.g., Bachelor of Science)' },
+                  institution: { type: Type.STRING, description: 'University or institution name' },
+                  year: { type: Type.STRING, description: 'Graduation year or date range' },
+                  field: { type: Type.STRING, description: 'Field of study or major' }
+                },
+                required: ['degree', 'institution', 'year', 'field']
+              }
+            },
+            skills: {
+              type: Type.ARRAY,
+              description: 'List of skills extracted from the resume',
+              items: { type: Type.STRING }
+            }
+          },
+          required: ['personalInfo', 'experience', 'education', 'skills']
+        }
+      }
+    });
+
+    const parsed = JSON.parse(response.text);
+
+    // Normalise — ensure every expected field exists
+    return {
+      personalInfo: {
+        fullName: parsed.personalInfo?.fullName || '',
+        email: parsed.personalInfo?.email || '',
+        phone: parsed.personalInfo?.phone || '',
+        location: parsed.personalInfo?.location || '',
+        linkedin: parsed.personalInfo?.linkedin || '',
+        targetJobTitle: parsed.personalInfo?.targetJobTitle || '',
+        summary: parsed.personalInfo?.summary || ''
+      },
+      experience: Array.isArray(parsed.experience) ? parsed.experience.map(exp => ({
+        company: exp.company || '',
+        role: exp.role || '',
+        location: exp.location || '',
+        startDate: exp.startDate || '',
+        endDate: exp.endDate || '',
+        description: exp.description || ''
+      })) : [],
+      education: Array.isArray(parsed.education) ? parsed.education.map(edu => ({
+        degree: edu.degree || '',
+        institution: edu.institution || '',
+        year: edu.year || '',
+        field: edu.field || ''
+      })) : [],
+      skills: Array.isArray(parsed.skills) ? parsed.skills : []
+    };
+  } catch (error) {
+    console.error('Error parsing resume PDF:', error);
+    throw new Error('Failed to parse resume PDF with AI. ' + error.message);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 module.exports = {
   generateBulletPoints,
   generateProfessionalSummary,
   analyzeResume,
-  generateCoverLetter
+  generateCoverLetter,
+  parseResumePDF
 };
+

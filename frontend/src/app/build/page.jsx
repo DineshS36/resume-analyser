@@ -76,6 +76,51 @@ export default function BuildResume() {
     }));
   }, []);
 
+  // Handler for when a PDF is parsed by AI — populates all form sections
+  const handlePDFParsed = useCallback((parsedData) => {
+    setResumeData(prev => ({
+      ...prev,
+      personalInfo: {
+        fullName: parsedData.personalInfo?.fullName || '',
+        email: parsedData.personalInfo?.email || '',
+        phone: parsedData.personalInfo?.phone || '',
+        location: parsedData.personalInfo?.location || '',
+        linkedin: parsedData.personalInfo?.linkedin || '',
+        website: prev.personalInfo?.website || '',
+      },
+      targetJobTitle: parsedData.personalInfo?.targetJobTitle || prev.targetJobTitle || '',
+      summary: parsedData.personalInfo?.summary || prev.summary || '',
+      experiences: Array.isArray(parsedData.experience) && parsedData.experience.length > 0
+        ? parsedData.experience.map((exp, index) => ({
+            id: `parsed-${Date.now()}-${index}`,
+            company: exp.company || '',
+            role: exp.role || '',
+            location: exp.location || '',
+            startDate: exp.startDate || '',
+            endDate: exp.endDate || '',
+            description: exp.description || '',
+            aiOptimizedBullets: [],
+          }))
+        : prev.experiences,
+      education: Array.isArray(parsedData.education) && parsedData.education.length > 0
+        ? parsedData.education.map((edu, index) => ({
+            id: `parsed-edu-${Date.now()}-${index}`,
+            degree: edu.degree || '',
+            institution: edu.institution || '',
+            year: edu.year || '',
+            field: edu.field || '',
+          }))
+        : prev.education,
+      skills: Array.isArray(parsedData.skills) && parsedData.skills.length > 0
+        ? parsedData.skills.map((skill, index) => ({
+            id: `parsed-skill-${Date.now()}-${index}`,
+            name: typeof skill === 'string' ? skill : skill.name || '',
+          }))
+        : prev.skills,
+      template: prev.template,
+    }));
+  }, []);
+
   // Show loading while checking auth
   if (authLoading || !isAuthenticated) {
     return (
@@ -194,6 +239,7 @@ export default function BuildResume() {
             onSummaryChange={(summary) => updateResumeData('summary', summary)}
             experiences={resumeData.experiences}
             skills={resumeData.skills}
+            onResumeParsed={handlePDFParsed}
           />
         );
       case 1:

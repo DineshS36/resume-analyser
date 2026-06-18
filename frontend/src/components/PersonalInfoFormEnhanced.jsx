@@ -1,18 +1,84 @@
 'use client';
 
-import { useState } from 'react';
-import { User, Mail, Phone, MapPin, Linkedin, Globe, Sparkles, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
-import { generateSummary } from '@/lib/api';
+import { useState, useRef } from 'react';
+import { User, Mail, Phone, MapPin, Linkedin, Globe, Sparkles, Loader2, CheckCircle, AlertCircle, Upload, FileText } from 'lucide-react';
+import { generateSummary, parseResumePDF } from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useValidation } from '@/hooks/useValidation';
 
-export default function PersonalInfoForm({ data, targetJobTitle, summary, onChange, onTargetJobTitleChange, onSummaryChange, experiences, skills }) {
+export default function PersonalInfoForm({ data, targetJobTitle, summary, onChange, onTargetJobTitleChange, onSummaryChange, experiences, skills, onResumeParsed }) {
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef(null);
   const { errors, validateField } = useValidation();
 
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
     validateField(field, value);
+  };
+
+  // --- PDF Upload Handlers ---
+  const handleFileSelect = async (file) => {
+    if (!file) return;
+
+    if (file.type !== 'application/pdf') {
+      toast.error('Please upload a PDF file only.', { icon: '📄' });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File too large. Maximum size is 10 MB.', { icon: '⚠️' });
+      return;
+    }
+
+    setIsParsing(true);
+    const loadingToast = toast.loading('Parsing resume with AI... This may take a moment.', {
+      icon: '🤖',
+    });
+
+    try {
+      const result = await parseResumePDF(file);
+      toast.dismiss(loadingToast);
+
+      if (result.success && result.data && onResumeParsed) {
+        onResumeParsed(result.data);
+        toast.success('Resume parsed successfully! All fields have been populated.', {
+          icon: '🎉',
+          duration: 4000,
+        });
+      } else {
+        toast.error('Failed to parse resume. Please try again.', { icon: '❌' });
+      }
+    } catch (error) {
+      console.error('Error parsing resume:', error);
+      toast.dismiss(loadingToast);
+      const errorMsg = error.response?.data?.error || 'Failed to parse resume. Please try again.';
+      toast.error(errorMsg, { icon: '❌' });
+    } finally {
+      setIsParsing(false);
+      // Reset the file input so the same file can be re-uploaded
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const file = e.dataTransfer.files[0];
+    handleFileSelect(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setIsDragOver(false);
   };
 
   const handleGenerateSummary = async () => {
@@ -61,6 +127,71 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
 
   return (
     <div className="space-y-6">
+      {/* PDF Upload Dropzone */}
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onClick={() => !isParsing && fileInputRef.current?.click()}
+        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-300 ${
+          isParsing
+            ? 'border-amber-400 bg-amber-50 cursor-wait'
+            : isDragOver
+            ? 'border-blue-500 bg-blue-50 scale-[1.02] shadow-lg shadow-blue-100'
+            : 'border-gray-300 bg-gradient-to-br from-gray-50 to-blue-50 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md'
+        }`}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,application/pdf"
+          onChange={(e) => handleFileSelect(e.target.files[0])}
+          className="hidden"
+          disabled={isParsing}
+        />
+        
+        {isParsing ? (
+          <div className="flex flex-col items-center space-y-3">
+            <div className="relative">
+              <div className="h-14 w-14 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200 animate-pulse">
+                <Loader2 className="h-7 w-7 text-white animate-spin" />
+              </div>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-amber-800">Parsing resume with AI...</p>
+              <p className="text-xs text-amber-600 mt-1">Extracting your information — this may take a moment</p>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center space-y-3">
+            <div className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
+              <Upload className="h-7 w-7 text-white" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-800">
+                Upload Existing Resume <span className="text-blue-600">(PDF)</span>
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Drag & drop your PDF here, or <span className="text-blue-600 font-medium underline">click to browse</span>
+              </p>
+            </div>
+            <div className="flex items-center space-x-2 text-xs text-gray-400">
+              <FileText className="h-3.5 w-3.5" />
+              <span>PDF only • Max 10 MB</span>
+              <span>•</span>
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              <span>AI auto-fills all fields</span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="relative flex items-center justify-center">
+        <div className="flex-grow border-t border-gray-200"></div>
+        <span className="mx-4 text-xs font-medium text-gray-400 uppercase tracking-wider">or fill manually</span>
+        <div className="flex-grow border-t border-gray-200"></div>
+      </div>
+
       {/* Target Job Title */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-xl border border-blue-200 shadow-sm hover:shadow-md transition-shadow duration-300">
         <label className="block text-sm font-semibold text-gray-900 mb-2">

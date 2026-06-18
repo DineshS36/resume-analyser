@@ -1,7 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter } = require('../services/geminiService');
+const multer = require('multer');
+const verifyToken = require('../middleware/auth');
+const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, parseResumePDF } = require('../services/geminiService');
 
+// Configure multer for in-memory file uploads (no disk writes)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB max
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'), false);
+    }
+  }
+});
 
 // POST /api/generate-bullet
 // Accepts raw text and target job title, returns 3 optimized bullet point options
@@ -136,6 +150,56 @@ router.post('/generate-cover-letter', async (req, res) => {
         res.status(500).json({ 
             error: 'Failed to generate cover letter',
             message: error.message 
+        });
+    }
+});
+
+// POST /api/parse-pdf
+// Accepts a PDF file upload, parses it with Gemini AI, and returns structured resume data
+router.post('/parse-pdf', verifyToken, upload.single('resume'), async (req, res) => {
+    try {
+        // Validate file was uploaded
+        if (!req.file) {
+            return res.status(400).json({
+                error: 'No file uploaded. Please select a PDF file.'
+            });
+        }
+
+        // Validate file type (double-check — multer fileFilter already handles this)
+        if (req.file.mimetype !== 'application/pdf') {
+            return res.status(400).json({
+                error: 'Invalid file type. Only PDF files are accepted.'
+            });
+        }
+
+        // Convert the in-memory buffer to base64 for the Gemini API
+        const base64Data = req.file.buffer.toString('base64');
+
+        // Call Gemini to parse the resume
+        const parsedResume = await parseResumePDF(base64Data);
+
+        res.json({
+            success: true,
+            data: parsedResume
+        });
+    } catch (error) {
+        console.error('Parse PDF error:', error);
+
+        // Handle multer-specific errors
+        if (error instanceof multer.MulterError) {
+            if (error.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({
+                    error: 'File too large. Maximum size is 10 MB.'
+                });
+            }
+            return res.status(400).json({
+                error: `Upload error: ${error.message}`
+            });
+        }
+
+        res.status(500).json({
+            error: 'Failed to parse resume PDF',
+            message: error.message
         });
     }
 });
