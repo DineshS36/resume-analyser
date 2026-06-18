@@ -2,9 +2,12 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Sparkles, FileText, Zap, Download, ArrowRight, CheckCircle, Star } from 'lucide-react';
+import { Sparkles, FileText, Zap, Download, ArrowRight, CheckCircle, Star, LogOut, UserCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
+
   return (
     <main className="min-h-screen bg-slate-50 overflow-hidden">
       {/* Animated Background */}
@@ -30,7 +33,7 @@ export default function Home() {
               AI Resume Builder
             </span>
           </motion.div>
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex items-center space-x-6">
             <motion.a 
               href="#features" 
               whileHover={{ scale: 1.05 }}
@@ -45,6 +48,40 @@ export default function Home() {
             >
               How It Works
             </motion.a>
+            {!isLoading && (
+              isAuthenticated ? (
+                <div className="flex items-center space-x-4 ml-4 pl-4 border-l border-slate-200">
+                  <div className="flex items-center space-x-2">
+                    <UserCircle className="h-5 w-5 text-primary-600" />
+                    <span className="text-sm font-medium text-slate-700">
+                      {user?.fullName || user?.email}
+                    </span>
+                  </div>
+                  <button
+                    onClick={logout}
+                    className="flex items-center px-3 py-1.5 text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                  >
+                    <LogOut className="h-4 w-4 mr-1" />
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-3 ml-4 pl-4 border-l border-slate-200">
+                  <Link
+                    href="/login"
+                    className="text-sm font-medium text-slate-600 hover:text-primary-600 transition-colors"
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-primary-600 to-purple-600 text-white hover:from-primary-700 hover:to-purple-700 shadow-sm transition-all"
+                  >
+                    Sign Up
+                  </Link>
+                </div>
+              )
+            )}
           </nav>
         </div>
       </header>

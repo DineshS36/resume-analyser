@@ -1,20 +1,19 @@
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middleware/auth');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
 
-// GET /api/resumes - Get all resumes for a user
+// Apply the auth middleware to ALL resume routes
+router.use(verifyToken);
+
+// GET /api/resumes - Get all resumes for the authenticated user
 router.get('/', async (req, res) => {
     try {
-        const { userId } = req.query;
-        
-        if (!userId) {
-            return res.status(400).json({ error: 'userId is required' });
-        }
-        
+        // We get the user ID from the verified token, NOT from the client request
         const resumes = await prisma.resume.findMany({
-            where: { userId },
+            where: { userId: req.user.id },
             include: {
                 experiences: true,
                 educations: true,
@@ -22,7 +21,7 @@ router.get('/', async (req, res) => {
             },
             orderBy: { updatedAt: 'desc' }
         });
-        
+
         res.json({ success: true, resumes });
     } catch (error) {
         console.error('Get resumes error:', error);
@@ -30,11 +29,11 @@ router.get('/', async (req, res) => {
     }
 });
 
-// GET /api/resumes/:id - Get single resume
+// GET /api/resumes/:id - Get single resume (with ownership check)
 router.get('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        
+
         const resume = await prisma.resume.findUnique({
             where: { id },
             include: {
@@ -46,11 +45,16 @@ router.get('/:id', async (req, res) => {
                 }
             }
         });
-        
+
         if (!resume) {
             return res.status(404).json({ error: 'Resume not found' });
         }
-        
+
+        // Verify ownership — prevent IDOR
+        if (resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized to access this resume' });
+        }
+
         res.json({ success: true, resume });
     } catch (error) {
         console.error('Get resume error:', error);
@@ -61,17 +65,18 @@ router.get('/:id', async (req, res) => {
 // POST /api/resumes - Create new resume
 router.post('/', async (req, res) => {
     try {
-        const { userId, title, templateId = 'classic' } = req.body;
-        
-        if (!userId || !title) {
-            return res.status(400).json({ 
-                error: 'Missing required fields: userId and title' 
+        const { title, templateId = 'classic' } = req.body;
+
+        if (!title) {
+            return res.status(400).json({
+                error: 'Missing required field: title'
             });
         }
-        
+
+        // userId comes exclusively from the token
         const resume = await prisma.resume.create({
             data: {
-                userId,
+                userId: req.user.id,
                 title,
                 templateId
             },
@@ -81,7 +86,7 @@ router.post('/', async (req, res) => {
                 skills: true
             }
         });
-        
+
         res.status(201).json({ success: true, resume });
     } catch (error) {
         console.error('Create resume error:', error);
@@ -94,11 +99,20 @@ router.put('/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { title, summary, templateId } = req.body;
-        
+
         if (!title) {
             return res.status(400).json({ error: 'Title is required' });
         }
-        
+
+        // Verify ownership first
+        const existingResume = await prisma.resume.findUnique({
+            where: { id }
+        });
+
+        if (!existingResume || existingResume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized to modify this resume' });
+        }
+
         const resume = await prisma.resume.update({
             where: { id },
             data: {
@@ -112,7 +126,7 @@ router.put('/:id', async (req, res) => {
                 skills: true
             }
         });
-        
+
         res.json({ success: true, resume });
     } catch (error) {
         console.error('Update resume error:', error);
@@ -124,11 +138,20 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        
+
+        // Verify ownership first
+        const existingResume = await prisma.resume.findUnique({
+            where: { id }
+        });
+
+        if (!existingResume || existingResume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized to delete this resume' });
+        }
+
         await prisma.resume.delete({
             where: { id }
         });
-        
+
         res.json({ success: true, message: 'Resume deleted successfully' });
     } catch (error) {
         console.error('Delete resume error:', error);
@@ -141,13 +164,19 @@ router.post('/:id/experiences', async (req, res) => {
     try {
         const { id } = req.params;
         const { company, role, location, startDate, endDate, description } = req.body;
-        
+
         if (!company || !role || !startDate) {
             return res.status(400).json({
                 error: 'Missing required fields: company, role, and startDate'
             });
         }
-        
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         const experience = await prisma.experience.create({
             data: {
                 resumeId: id,
@@ -159,7 +188,7 @@ router.post('/:id/experiences', async (req, res) => {
                 description
             }
         });
-        
+
         res.status(201).json({ success: true, experience });
     } catch (error) {
         console.error('Add experience error:', error);
@@ -170,9 +199,15 @@ router.post('/:id/experiences', async (req, res) => {
 // PUT /api/resumes/:id/experiences/:expId - Update experience
 router.put('/:id/experiences/:expId', async (req, res) => {
     try {
-        const { expId } = req.params;
+        const { id, expId } = req.params;
         const { company, role, location, startDate, endDate, description } = req.body;
-        
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         const experience = await prisma.experience.update({
             where: { id: expId },
             data: {
@@ -184,7 +219,7 @@ router.put('/:id/experiences/:expId', async (req, res) => {
                 description
             }
         });
-        
+
         res.json({ success: true, experience });
     } catch (error) {
         console.error('Update experience error:', error);
@@ -195,12 +230,18 @@ router.put('/:id/experiences/:expId', async (req, res) => {
 // DELETE /api/resumes/:id/experiences/:expId - Delete experience
 router.delete('/:id/experiences/:expId', async (req, res) => {
     try {
-        const { expId } = req.params;
-        
+        const { id, expId } = req.params;
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         await prisma.experience.delete({
             where: { id: expId }
         });
-        
+
         res.json({ success: true, message: 'Experience deleted successfully' });
     } catch (error) {
         console.error('Delete experience error:', error);
@@ -213,13 +254,19 @@ router.post('/:id/educations', async (req, res) => {
     try {
         const { id } = req.params;
         const { institution, degree, field, graduationDate } = req.body;
-        
+
         if (!institution || !degree) {
             return res.status(400).json({
                 error: 'Missing required fields: institution and degree'
             });
         }
-        
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         const education = await prisma.education.create({
             data: {
                 resumeId: id,
@@ -229,7 +276,7 @@ router.post('/:id/educations', async (req, res) => {
                 graduationDate
             }
         });
-        
+
         res.status(201).json({ success: true, education });
     } catch (error) {
         console.error('Add education error:', error);
@@ -240,20 +287,26 @@ router.post('/:id/educations', async (req, res) => {
 // DELETE /api/resumes/:id/educations/:eduId - Delete education
 router.delete('/:id/educations/:eduId', async (req, res) => {
     try {
-        const { eduId } = req.params;
-        
+        const { id, eduId } = req.params;
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         const existingEducation = await prisma.education.findUnique({
             where: { id: eduId }
         });
-        
+
         if (!existingEducation) {
             return res.status(404).json({ error: 'Education not found' });
         }
-        
+
         await prisma.education.delete({
             where: { id: eduId }
         });
-        
+
         res.json({ success: true, message: 'Education deleted successfully' });
     } catch (error) {
         console.error('Delete education error:', error);
@@ -266,13 +319,19 @@ router.post('/:id/skills', async (req, res) => {
     try {
         const { id } = req.params;
         const { name, level = 'Intermediate' } = req.body;
-        
+
         if (!name) {
             return res.status(400).json({
                 error: 'Missing required field: name'
             });
         }
-        
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         const skill = await prisma.skill.create({
             data: {
                 resumeId: id,
@@ -280,7 +339,7 @@ router.post('/:id/skills', async (req, res) => {
                 level
             }
         });
-        
+
         res.status(201).json({ success: true, skill });
     } catch (error) {
         console.error('Add skill error:', error);
@@ -291,20 +350,26 @@ router.post('/:id/skills', async (req, res) => {
 // DELETE /api/resumes/:id/skills/:skillId - Delete skill
 router.delete('/:id/skills/:skillId', async (req, res) => {
     try {
-        const { skillId } = req.params;
-        
+        const { id, skillId } = req.params;
+
+        // Verify resume ownership
+        const resume = await prisma.resume.findUnique({ where: { id } });
+        if (!resume || resume.userId !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         const existingSkill = await prisma.skill.findUnique({
             where: { id: skillId }
         });
-        
+
         if (!existingSkill) {
             return res.status(404).json({ error: 'Skill not found' });
         }
-        
+
         await prisma.skill.delete({
             where: { id: skillId }
         });
-        
+
         res.json({ success: true, message: 'Skill deleted successfully' });
     } catch (error) {
         console.error('Delete skill error:', error);
@@ -313,4 +378,3 @@ router.delete('/:id/skills/:skillId', async (req, res) => {
 });
 
 module.exports = router;
-

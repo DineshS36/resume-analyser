@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ChevronRight, ChevronLeft, User, Briefcase, GraduationCap, Wrench, Eye, Download, RotateCcw } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, User, Briefcase, GraduationCap, Wrench, Eye, Download, RotateCcw, LogOut, UserCircle } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import PersonalInfoForm from '@/components/PersonalInfoFormEnhanced';
 import ExperienceForm from '@/components/ExperienceForm';
 import EducationForm from '@/components/EducationForm';
@@ -26,6 +27,7 @@ const steps = [
 
 export default function BuildResume() {
   const router = useRouter();
+  const { user, isAuthenticated, isLoading: authLoading, logout } = useAuth();
   const [currentStep, setCurrentStep] = useState(0);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -59,6 +61,25 @@ export default function BuildResume() {
   });
 
   useAutoSave(resumeData, setResumeData);
+
+  // Auth guard — redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  // Show loading while checking auth
+  if (authLoading || !isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-10 w-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-500 font-medium">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   const updateResumeData = useCallback((section, data) => {
     setResumeData(prev => ({
@@ -243,6 +264,12 @@ export default function BuildResume() {
               </span>
             </div>
             <div className="flex items-center space-x-3">
+              <div className="hidden sm:flex items-center space-x-2 mr-2 pr-3 border-r border-gray-200">
+                <UserCircle className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.fullName || user?.email}
+                </span>
+              </div>
               <button
                 onClick={handleClearData}
                 className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
@@ -251,10 +278,11 @@ export default function BuildResume() {
                 Start Fresh
               </button>
               <button
-                onClick={() => router.push('/')}
-                className="text-gray-600 hover:text-gray-900 font-medium px-3 py-2 hover:bg-gray-100 rounded-lg transition-all"
+                onClick={logout}
+                className="flex items-center px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
               >
-                Exit
+                <LogOut className="h-4 w-4 mr-1" />
+                Logout
               </button>
             </div>
           </div>

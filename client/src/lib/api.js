@@ -9,6 +9,41 @@ const api = axios.create({
   },
 });
 
+// Axios request interceptor — automatically attach the JWT to every request
+api.interceptors.request.use(
+  (config) => {
+    // Only runs in the browser (not during SSR)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('resume_builder_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Axios response interceptor — handle 401/403 globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      // Token expired or invalid — only clear storage, don't redirect
+      // (the AuthContext will handle the UI state)
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        // Only auto-clear on protected routes, not on login/signup
+        if (currentPath !== '/login' && currentPath !== '/signup') {
+          localStorage.removeItem('resume_builder_token');
+          localStorage.removeItem('resume_builder_user');
+        }
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 // AI API endpoints
 export const generateBulletPoints = async (rawInput, targetJobTitle) => {
   try {
@@ -66,10 +101,9 @@ export const generateCoverLetter = async (personalInfo, targetJobTitle, summary,
 
 // Resume API endpoints
 
-export const createResume = async (userId, title, templateId = 'classic') => {
+export const createResume = async (title, templateId = 'classic') => {
   try {
     const response = await api.post('/api/resumes', {
-      userId,
       title,
       templateId,
     });
@@ -86,6 +120,16 @@ export const getResume = async (id) => {
     return response.data;
   } catch (error) {
     console.error('Error fetching resume:', error);
+    throw error;
+  }
+};
+
+export const getResumes = async () => {
+  try {
+    const response = await api.get('/api/resumes');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching resumes:', error);
     throw error;
   }
 };

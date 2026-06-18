@@ -11,10 +11,12 @@ app.use(cors());
 app.use(express.json());
 
 // Import routes
+const authRoutes = require('./routes/auth');
 const aiRoutes = require('./routes/ai');
 const resumeRoutes = require('./routes/resumes');
 
 // Register routes
+app.use('/api/auth', authRoutes);
 app.use('/api', aiRoutes);
 app.use('/api/resumes', resumeRoutes);
 
