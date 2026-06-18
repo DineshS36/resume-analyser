@@ -60,14 +60,14 @@ npm run install:all
 
 3. **Set up environment variables:**
 
-Create `server/.env`:
+Create `backend/.env`:
 ```env
 DATABASE_URL="postgresql://username:password@localhost:5432/ai_resume_builder?schema=public"
 GEMINI_API_KEY=your_gemini_api_key_here
 PORT=5000
 ```
 
-Create `client/.env.local`:
+Create `frontend/.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
@@ -83,7 +83,7 @@ npm run db:generate
 npm run dev
 ```
 
-This will start both the backend server (port 5000) and frontend client (port 3000).
+This will start both the backend server (port 5001) and frontend client (port 3000).
 
 ## 📚 API Documentation
 
@@ -204,14 +204,14 @@ competencies. Make it ATS-friendly with relevant keywords.
 
 ```
 ai-resume-builder/
-├── client/                 # Next.js frontend
+├── frontend/               # Next.js frontend
 │   ├── src/
 │   │   ├── app/           # Next.js app router
 │   │   ├── components/    # React components
 │   │   └── lib/           # API utilities
 │   ├── package.json
 │   └── tailwind.config.js
-├── server/                 # Express backend
+├── backend/                # Express backend
 │   ├── routes/            # API routes
 │   ├── services/          # Business logic
 │   ├── prisma/            # Database schema
@@ -224,15 +224,15 @@ ai-resume-builder/
 ## 🛠️ Development Scripts
 
 - `npm run install:all` - Install dependencies for all packages
-- `npm run dev` - Start both client and server in development mode
-- `npm run dev:server` - Start only the backend server
-- `npm run dev:client` - Start only the frontend client
+- `npm run dev` - Start both backend and frontend in development mode
+- `npm run dev:backend` - Start only the backend server
+- `npm run dev:frontend` - Start only the frontend client
 - `npm run db:migrate` - Run database migrations
 - `npm run db:studio` - Open Prisma Studio
 
 ## 🔒 Environment Variables
 
-### Server (.env)
+### Backend (.env)
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
@@ -240,7 +240,7 @@ ai-resume-builder/
 | `PORT` | Server port (default: 5000) | No |
 | `CORS_ORIGINS` | Allowed CORS origins | No |
 
-### Client (.env.local)
+### Frontend (.env.local)
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `NEXT_PUBLIC_API_URL` | Backend API URL | Yes |
