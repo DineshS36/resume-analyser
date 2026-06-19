@@ -2,7 +2,8 @@
 
 import { useState, useRef } from 'react';
 import { User, Mail, Phone, MapPin, Linkedin, Globe, Sparkles, Loader2, CheckCircle, AlertCircle, Upload, FileText } from 'lucide-react';
-import { generateSummary, parseResumePDF } from '@/lib/api';
+import { generateSummary } from '@/lib/api';
+import api from '@/lib/api';
 import toast from 'react-hot-toast';
 import { useValidation } from '@/hooks/useValidation';
 
@@ -38,11 +39,18 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
     });
 
     try {
-      const result = await parseResumePDF(file);
+      setIsParsing(true);
+      const formData = new FormData();
+      formData.append('resume', file);
+      
+      const res = await api.post('/api/parse-pdf', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
       toast.dismiss(loadingToast);
 
-      if (result.success && result.data && onResumeParsed) {
-        onResumeParsed(result.data);
+      if (res.data && res.data.success && res.data.data && onResumeParsed) {
+        onResumeParsed(res.data.data);
         toast.success('Resume parsed successfully! All fields have been populated.', {
           icon: '🎉',
           duration: 4000,
@@ -51,13 +59,11 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
         toast.error('Failed to parse resume. Please try again.', { icon: '❌' });
       }
     } catch (error) {
-      console.error('Error parsing resume:', error);
       toast.dismiss(loadingToast);
-      const errorMsg = error.response?.data?.error || 'Failed to parse resume. Please try again.';
-      toast.error(errorMsg, { icon: '❌' });
+      toast.error("Failed to parse PDF. Please try again.", { icon: '❌' });
+      console.error(error);
     } finally {
-      setIsParsing(false);
-      // Reset the file input so the same file can be re-uploaded
+      setIsParsing(false); // THIS STOPS THE ZOMBIE SPINNER
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }

@@ -314,17 +314,17 @@ Write a cover letter for this candidate applying to the ${targetJobTitle} positi
 // ---------------------------------------------------------------------------
 const crypto = require('crypto');
 
-const PARSE_PDF_SYSTEM_PROMPT = `You are an expert ATS data extraction engine. You will receive a PDF resume. Extract ALL information from it and return structured JSON.
+const PARSE_PDF_SYSTEM_PROMPT = `You are a strict, robotic data extraction pipeline. YOU MUST OBEY THESE TWO RULES:
+1. NO INTERNAL MONOLOGUE. Do not reason, debate, or think out loud. Never use words like 'Wait', 'Done', 'Let me check', or 'Perfect'. Output ONLY the final extracted text directly from the resume.
+2. STRICT CLASSIFICATION: Use the 'Follow the Money' rule. If the resume indicates the user worked for a company, had a job title (e.g., Intern, Developer), or was employed by an organization, it MUST go into the 'experience' array. If the entry is an app, website, GitHub repository, or academic build created independently (like 'ChatUp' or 'Roasting AI'), it MUST go into the 'projects' array.
 
-STRICT RULES:
-1. Dates MUST be in 'MMM YYYY' format (e.g., 'Jan 2021', 'Dec 2019'). If the position is current, use 'Present' for the end date.
-2. Do NOT hallucinate data. If a field (like LinkedIn, phone, or a specific date) is missing from the PDF, return an empty string ''.
-3. The job title (role) and company name MUST be explicitly separated into their own fields. Never combine them.
-4. The degree name and institution name MUST be explicitly separated into their own fields.
-5. For work experience descriptions, extract the core achievements and format them as a single text block with each bullet point on its own line, prefixed with '• '. Keep them action-oriented and concise.
-6. Extract ALL skills mentioned anywhere in the resume — in dedicated skills sections, within experience descriptions, or in the summary.
-7. For the professional summary, extract the existing summary/objective verbatim. If none exists, return an empty string — do NOT generate one.
-8. Strictly separate formal employment (Experience) from personal, academic, or portfolio builds (Projects). If a user built an app or website independently, it MUST go into the projects array, not the experience array.`;
+ADDITIONAL RULES:
+3. Dates MUST be in 'MMM YYYY' format (e.g., 'Jan 2021', 'Dec 2019'). If the position is current, use 'Present' for the end date.
+4. Do NOT hallucinate data. If a field (like LinkedIn, phone, or a specific date) is missing from the PDF, return an empty string ''.
+5. The job title (role) and company name MUST be explicitly separated into their own fields. Never combine them.
+6. The degree name and institution name MUST be explicitly separated into their own fields.
+7. Extract ALL skills mentioned anywhere in the resume.
+8. For the professional summary, extract the existing summary/objective verbatim. If none exists, return an empty string — do NOT generate one.`;
 
 async function parseResumePDF(base64Data) {
   if (!ai) {
@@ -400,6 +400,9 @@ async function parseResumePDF(base64Data) {
         }
       ],
       config: {
+        temperature: 0.1,
+        topK: 1,
+        topP: 0.1,
         responseMimeType: 'application/json',
         responseSchema: {
           type: Type.OBJECT,
@@ -433,7 +436,7 @@ async function parseResumePDF(base64Data) {
                   description: { 
                     type: Type.ARRAY, 
                     items: { type: Type.STRING },
-                    description: 'Split the job duties into distinct, individual bullet points. Do not include • characters.'
+                    description: 'Exact sentences from the resume, split into array items.'
                   }
                 },
                 required: ['company', 'role', 'location', 'startDate', 'endDate', 'description']
@@ -455,20 +458,18 @@ async function parseResumePDF(base64Data) {
             },
             projects: {
               type: Type.ARRAY,
-              description: 'Personal, academic, or portfolio projects',
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  projectName: { type: Type.STRING, description: 'Name of the project' },
-                  techStack: { type: Type.STRING, description: 'Technologies used. Empty string if not provided.' },
-                  link: { type: Type.STRING, description: 'Link to the project (e.g., GitHub, Live URL). Empty string if not provided.' },
-                  description: {
-                    type: Type.ARRAY,
+                  projectName: { type: Type.STRING },
+                  techStack: { type: Type.STRING, description: "Extract the programming languages and tools used." },
+                  link: { type: Type.STRING, description: "Extract any GitHub or live URL specific to this project." },
+                  description: { 
+                    type: Type.ARRAY, 
                     items: { type: Type.STRING },
-                    description: 'Split the project description into distinct bullet points.'
+                    description: 'Exact sentences from the resume, split into array items.'
                   }
-                },
-                required: ['projectName', 'techStack', 'link', 'description']
+                }
               }
             },
             skills: {
@@ -515,13 +516,10 @@ async function parseResumePDF(base64Data) {
         field: edu.field || '',
         graduationDate: edu.graduationDate || ''
       })) : [],
-      projects: Array.isArray(parsed.projects) ? parsed.projects.map(proj => ({
+      projects: (parsed.projects || []).map(proj => ({
         id: crypto.randomUUID(),
-        projectName: proj.projectName || '',
-        techStack: proj.techStack || '',
-        link: proj.link || '',
-        description: Array.isArray(proj.description) ? proj.description : (typeof proj.description === 'string' ? [proj.description] : [])
-      })) : [],
+        ...proj
+      })),
       skills: Array.isArray(parsed.skills) ? parsed.skills.map(skill => ({
         id: crypto.randomUUID(),
         name: typeof skill === 'string' ? skill : String(skill)
