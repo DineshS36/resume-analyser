@@ -60,12 +60,12 @@ export default function EducationForm({ education, onChange }) {
                     </label>
                     <input
                       type="text"
-                      value={edu.institution}
+                      value={edu.institution || ''}
                       onChange={(e) =>
                         updateEducation(edu.id, 'institution', e.target.value)
                       }
                       placeholder="University or School Name"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
                     />
                   </div>
 
@@ -75,11 +75,11 @@ export default function EducationForm({ education, onChange }) {
                         Degree *
                       </label>
                       <select
-                        value={edu.degree}
+                        value={edu.degree || ''}
                         onChange={(e) =>
                           updateEducation(edu.id, 'degree', e.target.value)
                         }
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900"
                       >
                         <option value="">Select Degree</option>
                         <option value="High School Diploma">High School Diploma</option>
@@ -98,12 +98,12 @@ export default function EducationForm({ education, onChange }) {
                       </label>
                       <input
                         type="text"
-                        value={edu.field}
+                        value={edu.field || ''}
                         onChange={(e) =>
                           updateEducation(edu.id, 'field', e.target.value)
                         }
                         placeholder="e.g., Computer Science"
-                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
                       />
                     </div>
                   </div>
@@ -114,12 +114,12 @@ export default function EducationForm({ education, onChange }) {
                     </label>
                     <input
                       type="text"
-                      value={edu.graduationDate}
+                      value={edu.graduationDate || ''}
                       onChange={(e) =>
                         updateEducation(edu.id, 'graduationDate', e.target.value)
                       }
                       placeholder="MM/YYYY"
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
                     />
                   </div>
 

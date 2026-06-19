@@ -250,14 +250,15 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
         <div ref={containerRef} className="w-full flex justify-center overflow-hidden bg-gray-100 rounded-lg">
           {/* The scaling wrapper */}
           <div 
-            className="origin-top flex justify-center transition-all duration-300" 
-            style={{ transform: `scale(${scale * (zoom / 100)})`, height: `${1123 * scale * (zoom / 100)}px` }}
+            className="origin-top flex justify-center transition-all duration-300 pb-20" 
+            style={{ transform: `scale(${scale * (zoom / 100)})` }}
           >
             {/* The STRICT A4 Document */}
             <div 
-              className="w-[794px] h-[1123px] bg-white shadow-2xl relative overflow-hidden shrink-0"
+              className="w-[794px] min-h-[1123px] bg-white shadow-2xl relative shrink-0"
               style={{
                 fontFamily: fontOptions.find(f => f.id === fontFamily)?.family,
+                backgroundImage: 'repeating-linear-gradient(transparent, transparent 1122px, #e5e7eb 1122px, #e5e7eb 1124px)'
               }}
             >
 

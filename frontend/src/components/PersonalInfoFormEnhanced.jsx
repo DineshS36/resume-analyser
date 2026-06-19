@@ -200,10 +200,10 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
         <div className="relative">
           <input
             type="text"
-            value={targetJobTitle}
+            value={targetJobTitle || ''}
             onChange={(e) => onTargetJobTitleChange(e.target.value)}
             placeholder="e.g., Senior Software Engineer"
-            className="w-full pl-4 pr-4 py-3 border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all bg-white shadow-sm"
+            className="w-full pl-4 pr-4 py-3 border-2 border-blue-300 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all bg-white shadow-sm text-gray-900 placeholder-gray-400"
           />
         </div>
         <p className="text-xs text-blue-600 mt-2 flex items-center">
@@ -234,7 +234,7 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
                   onChange={(e) => handleChange(field.id, e.target.value)}
                   onBlur={(e) => validateField(field.id, e.target.value)}
                   placeholder={field.placeholder}
-                  className={`w-full pl-10 pr-10 py-3 border-2 rounded-xl focus:ring-4 transition-all shadow-sm ${
+                  className={`w-full pl-10 pr-10 py-3 border-2 rounded-xl focus:ring-4 transition-all shadow-sm text-gray-900 placeholder-gray-400 ${
                     error
                       ? 'border-red-300 focus:ring-red-200 focus:border-red-500 bg-red-50'
                       : 'border-gray-200 focus:ring-blue-200 focus:border-blue-500 hover:border-blue-300'
@@ -288,11 +288,11 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
         </div>
         
         <textarea
-          value={summary}
+          value={summary || ''}
           onChange={(e) => onSummaryChange(e.target.value)}
           placeholder="Write a brief professional summary, or click 'Generate with AI' to create one automatically..."
           rows={4}
-          className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all resize-none shadow-sm"
+          className="w-full px-4 py-3 border-2 border-purple-200 rounded-xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all resize-none shadow-sm text-gray-900 placeholder-gray-400"
         />
         
         <div className="flex items-center justify-between mt-2">

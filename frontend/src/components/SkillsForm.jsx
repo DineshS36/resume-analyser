@@ -68,16 +68,16 @@ export default function SkillsForm({ skills, onChange }) {
         <div className="flex gap-3">
           <input
             type="text"
-            value={newSkill}
+            value={newSkill || ''}
             onChange={(e) => setNewSkill(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Enter a skill (e.g., React, Project Management)"
-            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
           />
           <select
-            value={newLevel}
+            value={newLevel || ''}
             onChange={(e) => setNewLevel(e.target.value)}
-            className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+            className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900"
           >
             <option value="Beginner">Beginner</option>
             <option value="Intermediate">Intermediate</option>

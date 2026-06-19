@@ -109,10 +109,10 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               <label className="block text-sm font-medium text-gray-700 mb-1">Company *</label>
               <input
                 type="text"
-                value={exp.company}
+                value={exp.company || ''}
                 onChange={(e) => updateExperience(exp.id, 'company', e.target.value)}
                 placeholder="e.g., Google, Microsoft, Startup Inc."
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
               />
             </div>
 
@@ -120,10 +120,10 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               <label className="block text-sm font-medium text-gray-700 mb-1">Role/Position *</label>
               <input
                 type="text"
-                value={exp.role}
+                value={exp.role || ''}
                 onChange={(e) => updateExperience(exp.id, 'role', e.target.value)}
                 placeholder="e.g., Senior Software Engineer"
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
               />
             </div>
 
@@ -134,9 +134,9 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               </label>
               <input
                 type="month"
-                value={exp.startDate}
+                value={exp.startDate || ''}
                 onChange={(e) => updateExperience(exp.id, 'startDate', e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
               />
             </div>
 
@@ -147,10 +147,10 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               </label>
               <input
                 type="month"
-                value={exp.endDate}
+                value={exp.endDate || ''}
                 onChange={(e) => updateExperience(exp.id, 'endDate', e.target.value)}
                 placeholder="Present"
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
               />
             </div>
 
@@ -161,10 +161,10 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               </label>
               <input
                 type="text"
-                value={exp.location}
+                value={exp.location || ''}
                 onChange={(e) => updateExperience(exp.id, 'location', e.target.value)}
                 placeholder="e.g., San Francisco, CA (or Remote)"
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
               />
             </div>
           </div>
@@ -175,10 +175,10 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               Job Description (for AI enhancement)
             </label>
             <textarea
-              value={Array.isArray(exp.description) ? exp.description.join('\n') : exp.description}
+              value={Array.isArray(exp.description) ? exp.description.join('\n') : (exp.description || '')}
               onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
               placeholder="Describe your responsibilities and achievements in simple terms. Our AI will transform this into professional bullet points."
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm h-32 resize-none"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm h-32 resize-none text-gray-900 placeholder-gray-400"
             />
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-gray-500">
