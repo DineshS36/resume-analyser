@@ -45,6 +45,7 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
   const previewRef = useRef(null);
   const containerRef = useRef(null);
   const [scale, setScale] = useState(1);
+  const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -148,10 +149,10 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
 
           {/* Right: Customization */}
           <div className="flex items-center space-x-2">
-            {/* Color Picker */}
+            {/* Theme / Template Modal Trigger */}
             <div className="relative">
               <button
-                onClick={() => setShowColorPicker(!showColorPicker)}
+                onClick={() => setIsThemeModalOpen(true)}
                 className="flex items-center space-x-2 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
               >
                 <Palette className="h-4 w-4 text-gray-600" />
@@ -259,24 +260,6 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
                 fontFamily: fontOptions.find(f => f.id === fontFamily)?.family,
               }}
             >
-              {/* Draggable Sections Indicator */}
-              <div className="absolute left-2 top-2 space-y-2 z-10">
-                {['header', 'summary', 'experience', 'education', 'skills'].map((section) => (
-                  <motion.div
-                    key={section}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, section)}
-                    onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, section)}
-                    whileHover={{ x: -2 }}
-                    className="flex items-center space-x-1 text-gray-400 bg-white/80 p-1 rounded shadow-sm cursor-move hover:text-gray-600"
-                    title={`Drag to reorder ${section}`}
-                  >
-                    <GripVertical className="h-4 w-4" />
-                    <span className="text-xs capitalize hidden lg:inline">{section}</span>
-                  </motion.div>
-                ))}
-              </div>
 
               {/* Resume Content */}
               <div style={{ 
@@ -297,10 +280,27 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
         </div>
       </div>
 
-      {/* Template Selector at Bottom */}
-      <div className="bg-white border-t border-gray-200 p-4">
-        <TemplateSelector selected={template} onSelect={onTemplateChange} />
-      </div>
+      {isThemeModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-y-auto p-6 relative">
+            {/* Close Button */}
+            <button 
+              onClick={() => setIsThemeModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black p-2 bg-gray-100 rounded-full"
+            >
+              ✕
+            </button>
+            
+            <TemplateSelector 
+              selected={template} 
+              onSelect={(newTemplate) => {
+                onTemplateChange(newTemplate);
+                setIsThemeModalOpen(false);
+              }} 
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

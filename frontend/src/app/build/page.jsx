@@ -320,7 +320,7 @@ export default function BuildResume() {
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Progress Steps */}
         <div className="mb-8">
           <div className="relative">
@@ -375,11 +375,12 @@ export default function BuildResume() {
         </div>
 
         {/* Main Content */}
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-screen-2xl mx-auto mt-8">
           {/* Form Section */}
-          <div 
-            className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
-          >
+          <div className="lg:col-span-4 h-[calc(100vh-100px)] overflow-y-auto pr-2 pb-20 custom-scrollbar">
+            <div 
+              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
+            >
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900">
                 {steps[currentStep].label}
@@ -436,11 +437,12 @@ export default function BuildResume() {
                 </button>
               )}
             </div>
+            </div>
           </div>
 
           {/* Live Preview Section */}
-          <div className="lg:sticky lg:top-24 lg:h-fit">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-100">
+          <div className="lg:col-span-8 bg-gray-50 rounded-xl p-4 flex flex-col h-[calc(100vh-100px)] overflow-hidden">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-100 h-full flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900 flex items-center">
                   <Eye className="h-5 w-5 mr-2 text-blue-600" />
