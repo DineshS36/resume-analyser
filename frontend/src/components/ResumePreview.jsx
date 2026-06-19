@@ -10,7 +10,7 @@ export default function ResumePreview({ data, template }) {
 
   // Classic Template
   const ClassicTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       {/* Header */}
       <div className="text-center border-b-2 border-gray-800 pb-4 mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -47,18 +47,12 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-4">
             {experiences.map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{exp.role}</h3>
-                    <p className="text-sm text-gray-700">{exp.company}</p>
-                  </div>
-                  <div className="text-right text-sm text-gray-600">
-                    <p>{exp.location}</p>
-                    <p>
-                      {formatDate(exp.startDate)} - {exp.endDate || 'Present'}
-                    </p>
-                  </div>
+                <h3 className="font-bold text-gray-900">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-gray-600">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (
                   <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                     {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -66,9 +60,9 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -79,7 +73,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -97,15 +91,15 @@ export default function ResumePreview({ data, template }) {
           </h2>
           <div className="space-y-3">
             {education.map((edu) => (
-              <div key={edu.id} className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-gray-900">{edu.institution}</h3>
-                  <p className="text-sm text-gray-700">
-                    {edu.degree}
-                    {edu.field && ` in ${edu.field}`}
-                  </p>
+              <div key={edu.id}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{edu.institution}</h4>
+                  <span className="text-sm">{edu.graduationDate}</span>
                 </div>
-                <p className="text-sm text-gray-600">{edu.graduationDate}</p>
+                <p className="text-sm text-gray-700">
+                  {edu.degree}
+                  {edu.field && ` in ${edu.field}`}
+                </p>
               </div>
             ))}
           </div>
@@ -135,7 +129,7 @@ export default function ResumePreview({ data, template }) {
 
   // Modern Template
   const ModernTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       {/* Header with accent */}
       <div className="bg-primary-600 text-white p-6 -mx-8 -mt-8 mb-6">
         <h1 className="text-3xl font-bold mb-2">
@@ -174,18 +168,12 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-4">
             {experiences.map((exp) => (
               <div key={exp.id} className="border-l-2 border-primary-200 pl-4">
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{exp.role}</h3>
-                    <p className="text-sm text-primary-600 font-medium">{exp.company}</p>
-                  </div>
-                  <div className="text-right text-sm text-gray-500">
-                    <p>{exp.location}</p>
-                    <p>
-                      {formatDate(exp.startDate)} - {exp.endDate || 'Present'}
-                    </p>
-                  </div>
+                <h3 className="font-bold text-gray-900">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (
                   <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                     {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -193,9 +181,9 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -206,7 +194,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -226,16 +214,14 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-3">
             {education.map((edu) => (
               <div key={edu.id} className="border-l-2 border-primary-200 pl-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{edu.institution}</h3>
-                    <p className="text-sm text-gray-700">
-                      {edu.degree}
-                      {edu.field && ` in ${edu.field}`}
-                    </p>
-                  </div>
-                  <p className="text-sm text-gray-500">{edu.graduationDate}</p>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{edu.institution}</h4>
+                  <span className="text-sm">{edu.graduationDate}</span>
                 </div>
+                <p className="text-sm text-gray-700">
+                  {edu.degree}
+                  {edu.field && ` in ${edu.field}`}
+                </p>
               </div>
             ))}
           </div>
@@ -266,7 +252,7 @@ export default function ResumePreview({ data, template }) {
 
   // Minimal Template
   const MinimalTemplate = () => (
-    <div className="p-8 bg-white text-gray-900 max-w-2xl mx-auto">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-4xl font-light text-gray-900 mb-2">
@@ -300,13 +286,11 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-6">
             {experiences.map((exp) => (
               <div key={exp.id}>
+                <h3 className="font-medium text-gray-900">{exp.role}</h3>
                 <div className="flex justify-between items-baseline mb-1">
-                  <h3 className="font-medium text-gray-900">{exp.role}</h3>
-                  <p className="text-xs text-gray-400">
-                    {formatDate(exp.startDate)} - {exp.endDate || 'Present'}
-                  </p>
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
-                <p className="text-sm text-gray-500 mb-2">{exp.company}</p>
                 {exp.aiOptimizedBullets?.length > 0 ? (
                   <ul className="list-disc list-inside text-sm space-y-1">
                     {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -316,7 +300,7 @@ export default function ResumePreview({ data, template }) {
                 ) : exp.description ? (
                   <div className="text-sm text-gray-600">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -327,7 +311,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -346,9 +330,9 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-3">
             {education.map((edu) => (
               <div key={edu.id}>
-                <div className="flex justify-between items-baseline">
-                  <h3 className="font-medium text-gray-900">{edu.institution}</h3>
-                  <p className="text-xs text-gray-400">{edu.graduationDate}</p>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{edu.institution}</h4>
+                  <span className="text-sm">{edu.graduationDate}</span>
                 </div>
                 <p className="text-sm text-gray-500">
                   {edu.degree}
@@ -376,7 +360,7 @@ export default function ResumePreview({ data, template }) {
 
   // Creative Template
   const CreativeTemplate = () => (
-    <div className="flex bg-white text-gray-900 min-h-full">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative shadow-lg flex">
       {/* Sidebar */}
       <div className="w-1/3 bg-gradient-to-b from-purple-600 to-pink-600 text-white p-6">
         <div className="mb-6">
@@ -429,10 +413,11 @@ export default function ResumePreview({ data, template }) {
               {experiences.map((exp) => (
                 <div key={exp.id} className="border-l-2 border-purple-200 pl-3">
                   <h3 className="font-bold text-gray-900">{exp.role}</h3>
-                  <p className="text-sm text-purple-600">{exp.company}</p>
-                  <p className="text-xs text-gray-500 mb-2">
-                    {formatDate(exp.startDate)} - {exp.endDate || 'Present'} | {exp.location}
-                  </p>
+                  <div className="flex justify-between items-baseline mb-1">
+                    <h4 className="font-bold">{exp.company}</h4>
+                    <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
+                  </div>
+                  {exp.location && <p className="text-xs text-gray-500 mb-2">{exp.location}</p>}
                   {exp.aiOptimizedBullets?.length > 0 ? (
                     <ul className="list-disc list-inside text-sm space-y-1">
                       {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -442,7 +427,7 @@ export default function ResumePreview({ data, template }) {
                   ) : exp.description ? (
                   <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -453,7 +438,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -469,12 +454,14 @@ export default function ResumePreview({ data, template }) {
             <div className="space-y-3">
               {education.map((edu) => (
                 <div key={edu.id}>
-                  <h3 className="font-bold text-gray-900">{edu.institution}</h3>
+                  <div className="flex justify-between items-baseline mb-1">
+                    <h4 className="font-bold">{edu.institution}</h4>
+                    <span className="text-sm">{edu.graduationDate}</span>
+                  </div>
                   <p className="text-sm text-gray-700">
                     {edu.degree}
                     {edu.field && ` in ${edu.field}`}
                   </p>
-                  <p className="text-xs text-gray-500">{edu.graduationDate}</p>
                 </div>
               ))}
             </div>
@@ -486,7 +473,7 @@ export default function ResumePreview({ data, template }) {
 
   // Executive Template
   const ExecutiveTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       {/* Premium Header */}
       <div className="border-b-4 border-slate-800 pb-6 mb-6">
         <h1 className="text-4xl font-serif text-slate-900 mb-2">
@@ -523,16 +510,12 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-5">
             {experiences.map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="font-bold text-slate-900 text-lg">{exp.role}</h3>
-                    <p className="text-slate-600 font-medium">{exp.company}</p>
-                  </div>
-                  <div className="text-right text-sm text-slate-500">
-                    <p className="font-medium">{exp.location}</p>
-                    <p>{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</p>
-                  </div>
+                <h3 className="font-bold text-slate-900 text-lg">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-slate-500">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (
                   <ul className="list-disc list-inside text-sm space-y-1 mt-2 text-slate-700">
                     {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -540,9 +523,9 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <div className="text-sm text-slate-700 mt-2">
+                  <div className="text-sm text-slate-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -553,7 +536,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -571,15 +554,15 @@ export default function ResumePreview({ data, template }) {
           </h2>
           <div className="space-y-3">
             {education.map((edu) => (
-              <div key={edu.id} className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-bold text-slate-900">{edu.institution}</h3>
-                  <p className="text-sm text-slate-700">
-                    {edu.degree}
-                    {edu.field && <span className="text-slate-500"> — {edu.field}</span>}
-                  </p>
+              <div key={edu.id}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{edu.institution}</h4>
+                  <span className="text-sm">{edu.graduationDate}</span>
                 </div>
-                <p className="text-sm text-slate-500">{edu.graduationDate}</p>
+                <p className="text-sm text-slate-700">
+                  {edu.degree}
+                  {edu.field && <span className="text-slate-500"> — {edu.field}</span>}
+                </p>
               </div>
             ))}
           </div>
@@ -607,7 +590,7 @@ export default function ResumePreview({ data, template }) {
 
   // Technical Template
   const TechnicalTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       {/* Header */}
       <div className="bg-blue-900 text-white p-6 -mx-8 -mt-8 mb-6">
         <h1 className="text-3xl font-mono font-bold mb-2">
@@ -660,16 +643,12 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-4">
             {experiences.map((exp) => (
               <div key={exp.id} className="border-l-2 border-blue-300 pl-4">
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="font-bold text-gray-900 font-mono">{exp.role}</h3>
-                    <p className="text-sm text-blue-700 font-mono">{exp.company}</p>
-                  </div>
-                  <div className="text-right text-xs text-gray-500 font-mono">
-                    <p>{exp.location}</p>
-                    <p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p>
-                  </div>
+                <h3 className="font-bold text-gray-900 font-mono">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-xs text-gray-500 font-mono">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (
                   <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                     {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -677,9 +656,9 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -690,7 +669,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -707,16 +686,14 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-3">
             {education.map((edu) => (
               <div key={edu.id} className="border-l-2 border-blue-300 pl-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-gray-900 font-mono">{edu.institution}</h3>
-                    <p className="text-sm text-gray-700 font-mono">
-                      {edu.degree}
-                      {edu.field && ` in ${edu.field}`}
-                    </p>
-                  </div>
-                  <p className="text-xs text-gray-500 font-mono">{edu.graduationDate}</p>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{edu.institution}</h4>
+                  <span className="text-sm">{edu.graduationDate}</span>
                 </div>
+                <p className="text-sm text-gray-700 font-mono">
+                  {edu.degree}
+                  {edu.field && ` in ${edu.field}`}
+                </p>
               </div>
             ))}
           </div>
@@ -727,7 +704,7 @@ export default function ResumePreview({ data, template }) {
 
   // Academic Template
   const AcademicTemplate = () => (
-    <div className="p-8 bg-white text-gray-900 max-w-3xl mx-auto">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       {/* Academic Header */}
       <div className="text-center mb-6 pb-6 border-b-2 border-amber-800">
         <h1 className="text-3xl font-serif text-amber-900 mb-2">
@@ -763,16 +740,12 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-4">
             {experiences.map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-start mb-1">
-                  <div>
-                    <h3 className="font-bold text-gray-900 font-serif">{exp.role}</h3>
-                    <p className="text-sm text-amber-700">{exp.company}</p>
-                  </div>
-                  <div className="text-right text-sm text-gray-600">
-                    <p>{exp.location}</p>
-                    <p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p>
-                  </div>
+                <h3 className="font-bold text-gray-900 font-serif">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-gray-600">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (
                   <ul className="list-disc list-inside text-sm space-y-1 mt-2">
                     {exp.aiOptimizedBullets.map((bullet, idx) => (
@@ -780,9 +753,9 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -793,7 +766,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -812,16 +785,14 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-3">
             {education.map((edu) => (
               <div key={edu.id}>
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="font-bold text-gray-900 font-serif">{edu.institution}</h3>
-                    <p className="text-sm text-gray-700">
-                      {edu.degree}
-                      {edu.field && ` in ${edu.field}`}
-                    </p>
-                  </div>
-                  <p className="text-sm text-gray-600">{edu.graduationDate}</p>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{edu.institution}</h4>
+                  <span className="text-sm">{edu.graduationDate}</span>
                 </div>
+                <p className="text-sm text-gray-700">
+                  {edu.degree}
+                  {edu.field && ` in ${edu.field}`}
+                </p>
               </div>
             ))}
           </div>
@@ -851,7 +822,7 @@ export default function ResumePreview({ data, template }) {
 
   // Two-Column Template
   const TwoColumnTemplate = () => (
-    <div className="flex bg-white text-gray-900 min-h-full">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative shadow-lg flex">
       <div className="w-1/3 bg-gray-900 text-white p-6">
         <div className="mb-6">
           <h1 className="text-xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
@@ -885,14 +856,16 @@ export default function ResumePreview({ data, template }) {
             <div className="space-y-4">
               {experiences.map((exp) => (
                 <div key={exp.id}>
-                  <div className="flex justify-between items-start mb-1">
-                    <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-sm text-gray-600">{exp.company}</p></div>
-                    <div className="text-right text-xs text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p></div>
+                  <h3 className="font-bold text-gray-900">{exp.role}</h3>
+                  <div className="flex justify-between items-baseline mb-1">
+                    <h4 className="font-bold">{exp.company}</h4>
+                    <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                   </div>
+                  {exp.location && <p className="text-xs text-gray-500">{exp.location}</p>}
                   {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -903,7 +876,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -918,7 +891,7 @@ export default function ResumePreview({ data, template }) {
 
   // Startup Template
   const StartupTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       <div className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white p-6 -mx-8 -mt-8 mb-6">
         <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
         {targetJobTitle && <p className="text-emerald-100 font-medium">{targetJobTitle}</p>}
@@ -936,14 +909,16 @@ export default function ResumePreview({ data, template }) {
             {experiences.map((exp) => (
               <div key={exp.id} className="relative pl-6 border-l-2 border-emerald-200">
                 <div className="absolute -left-2 top-0 w-4 h-4 bg-emerald-500 rounded-full"></div>
-                <div className="flex justify-between items-start mb-1">
-                  <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-emerald-600 font-medium">{exp.company}</p></div>
-                  <div className="text-right text-sm text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p></div>
+                <h3 className="font-bold text-gray-900">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -954,7 +929,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -970,7 +945,7 @@ export default function ResumePreview({ data, template }) {
 
   // Consultant Template
   const ConsultantTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       <div className="border-b-2 border-orange-500 pb-4 mb-6">
         <h1 className="text-3xl font-serif font-bold text-gray-900 mb-1">{personalInfo.fullName || 'Your Name'}</h1>
         {targetJobTitle && <p className="text-lg text-orange-600 font-medium">{targetJobTitle}</p>}
@@ -983,14 +958,16 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-5">
             {experiences.map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-start mb-2">
-                  <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-orange-600 font-medium">{exp.company}</p></div>
-                  <div className="text-right text-sm text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</p></div>
+                <h3 className="font-bold text-gray-900">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2 text-gray-700">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx}>{bullet}</li>))}</ul>) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -1001,7 +978,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -1017,7 +994,7 @@ export default function ResumePreview({ data, template }) {
 
   // Medical Template
   const MedicalTemplate = () => (
-    <div className="p-8 bg-white text-gray-900">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg">
       <div className="bg-gradient-to-r from-cyan-700 to-sky-600 text-white p-6 -mx-8 -mt-8 mb-6">
         <h1 className="text-3xl font-bold mb-2">{personalInfo.fullName || 'Your Name'}</h1>
         {targetJobTitle && <p className="text-cyan-100">{targetJobTitle}</p>}
@@ -1030,14 +1007,16 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-4">
             {experiences.map((exp) => (
               <div key={exp.id} className="border-l-4 border-cyan-200 pl-4">
-                <div className="flex justify-between items-start mb-1">
-                  <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-cyan-700 font-medium">{exp.company}</p></div>
-                  <div className="text-right text-sm text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p></div>
+                <h3 className="font-bold text-gray-900">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-gray-500">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (
-                  <div className="text-sm text-gray-700 mt-2">
+                  <div className="text-sm text-gray-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -1048,7 +1027,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -1064,7 +1043,7 @@ export default function ResumePreview({ data, template }) {
 
   // Finance Template
   const FinanceTemplate = () => (
-    <div className="p-8 bg-white text-gray-900 font-serif">
+    <div className="w-full aspect-[210/297] bg-white text-black overflow-hidden relative px-8 py-10 shadow-lg font-serif">
       <div className="bg-slate-800 text-white p-6 -mx-8 -mt-8 mb-6">
         <h1 className="text-3xl font-bold mb-1">{personalInfo.fullName || 'Your Name'}</h1>
         {targetJobTitle && <p className="text-slate-300 font-medium tracking-wide">{targetJobTitle}</p>}
@@ -1077,14 +1056,16 @@ export default function ResumePreview({ data, template }) {
           <div className="space-y-5">
             {experiences.map((exp) => (
               <div key={exp.id}>
-                <div className="flex justify-between items-start mb-2">
-                  <div><h3 className="font-bold text-slate-900">{exp.role}</h3><p className="text-slate-600 font-medium">{exp.company}</p></div>
-                  <div className="text-right text-sm text-slate-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</p></div>
+                <h3 className="font-bold text-slate-900">{exp.role}</h3>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h4 className="font-bold">{exp.company}</h4>
+                  <span className="text-sm">{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</span>
                 </div>
+                {exp.location && <p className="text-sm text-slate-500">{exp.location}</p>}
                 {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2 text-slate-700">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx}>{bullet}</li>))}</ul>) : exp.description ? (
-                  <div className="text-sm text-slate-700 mt-2">
+                  <div className="text-sm text-slate-700">
                     {Array.isArray(exp.description) ? (
-                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
                         {exp.description.map((bullet, i) => {
                           const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
                           return (
@@ -1095,7 +1076,7 @@ export default function ResumePreview({ data, template }) {
                         })}
                       </ul>
                     ) : (
-                      <p className="leading-relaxed">{exp.description}</p>
+                      <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
                     )}
                   </div>
                 ) : null}
