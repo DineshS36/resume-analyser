@@ -1,7 +1,7 @@
 'use client';
 
 export default function ResumePreview({ data, template }) {
-  const { personalInfo, targetJobTitle, summary, experiences, education, skills } = data;
+  const { personalInfo, targetJobTitle, summary, experiences, projects = [], education, skills } = data;
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -74,6 +74,51 @@ export default function ResumePreview({ data, template }) {
                       </ul>
                     ) : (
                       <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-300 pb-1 mb-3 uppercase tracking-wide">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="break-inside-avoid mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-bold text-gray-900">{proj.projectName}</h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                      View Project
+                    </a>
+                  )}
+                </div>
+                {proj.techStack && (
+                  <p className="text-sm text-gray-600 italic mb-2">{proj.techStack}</p>
+                )}
+                {proj.description ? (
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                        {proj.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -204,6 +249,52 @@ export default function ResumePreview({ data, template }) {
         </div>
       )}
 
+      
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-primary-600 mb-3 flex items-center">
+            <span className="w-1 h-6 bg-primary-600 mr-2 rounded"></span>
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="order-l-2 border-primary-200 pl-4 break-inside-avoid mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-bold text-gray-900">{proj.projectName}</h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                      View Project
+                    </a>
+                  )}
+                </div>
+                {proj.techStack && (
+                  <p className="text-sm text-gray-600 italic mb-2">{proj.techStack}</p>
+                )}
+                {proj.description ? (
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                        {proj.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education */}
       {education.length > 0 && (
         <div className="mb-6">
@@ -312,6 +403,51 @@ export default function ResumePreview({ data, template }) {
                       </ul>
                     ) : (
                       <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-300 pb-1 mb-3 uppercase tracking-wide">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="break-inside-avoid mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-medium text-gray-900">{proj.projectName}</h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                      View Project
+                    </a>
+                  )}
+                </div>
+                {proj.techStack && (
+                  <p className="text-sm text-gray-600 italic mb-2">{proj.techStack}</p>
+                )}
+                {proj.description ? (
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                        {proj.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
                     )}
                   </div>
                 ) : null}
@@ -546,6 +682,51 @@ export default function ResumePreview({ data, template }) {
         </div>
       )}
 
+      
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-300 pb-1 mb-3 uppercase tracking-wide">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="order-l-2 border-purple-200 pl-3 break-inside-avoid mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-bold text-gray-900">{proj.projectName}</h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                      View Project
+                    </a>
+                  )}
+                </div>
+                {proj.techStack && (
+                  <p className="text-sm text-gray-600 italic mb-2">{proj.techStack}</p>
+                )}
+                {proj.description ? (
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                        {proj.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education */}
       {education.length > 0 && (
         <div className="mb-6">
@@ -670,6 +851,51 @@ export default function ResumePreview({ data, template }) {
                       </ul>
                     ) : (
                       <p className="text-sm mt-2 leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-lg font-bold text-gray-900 border-b border-gray-300 pb-1 mb-3 uppercase tracking-wide">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="order-l-2 border-blue-300 pl-4 break-inside-avoid mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-bold text-gray-900 font-mono">{proj.projectName}</h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                      View Project
+                    </a>
+                  )}
+                </div>
+                {proj.techStack && (
+                  <p className="text-sm text-gray-600 italic mb-2">{proj.techStack}</p>
+                )}
+                {proj.description ? (
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                        {proj.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
                     )}
                   </div>
                 ) : null}

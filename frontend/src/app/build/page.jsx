@@ -2,10 +2,11 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ChevronRight, ChevronLeft, User, Briefcase, GraduationCap, Wrench, Eye, Download, RotateCcw, LogOut, UserCircle } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, User, Briefcase, GraduationCap, Wrench, Eye, Download, RotateCcw, LogOut, UserCircle, FolderDot } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import PersonalInfoForm from '@/components/PersonalInfoFormEnhanced';
 import ExperienceForm from '@/components/ExperienceForm';
+import ProjectsForm from '@/components/ProjectsForm';
 import EducationForm from '@/components/EducationForm';
 import SkillsForm from '@/components/SkillsForm';
 import ResumePreview from '@/components/ResumePreviewEnhanced';
@@ -20,6 +21,7 @@ import toast from 'react-hot-toast';
 const steps = [
   { id: 'personal', label: 'Personal Info', icon: User },
   { id: 'experience', label: 'Experience', icon: Briefcase },
+  { id: 'projects', label: 'Projects', icon: FolderDot },
   { id: 'education', label: 'Education', icon: GraduationCap },
   { id: 'skills', label: 'Skills', icon: Wrench },
   { id: 'preview', label: 'Preview', icon: Eye },
@@ -55,6 +57,7 @@ export default function BuildResume() {
         aiOptimizedBullets: [],
       },
     ],
+    projects: [],
     education: [],
     skills: [],
     template: 'classic',
@@ -95,6 +98,9 @@ export default function BuildResume() {
       experiences: Array.isArray(parsedData.experience) && parsedData.experience.length > 0
         ? parsedData.experience
         : prev.experiences,
+      projects: Array.isArray(parsedData.projects) && parsedData.projects.length > 0
+        ? parsedData.projects
+        : prev.projects,
       education: Array.isArray(parsedData.education) && parsedData.education.length > 0
         ? parsedData.education
         : prev.education,
@@ -145,6 +151,7 @@ export default function BuildResume() {
         targetJobTitle: '',
         summary: '',
         experiences: [],
+        projects: [],
         education: [],
         skills: [],
         template: 'classic',
@@ -236,19 +243,26 @@ export default function BuildResume() {
         );
       case 2:
         return (
+          <ProjectsForm
+            projects={resumeData.projects || []}
+            onChange={(projects) => updateResumeData('projects', projects)}
+          />
+        );
+      case 3:
+        return (
           <EducationForm
             education={resumeData.education}
             onChange={(education) => updateResumeData('education', education)}
           />
         );
-      case 3:
+      case 4:
         return (
           <SkillsForm
             skills={resumeData.skills}
             onChange={(skills) => updateResumeData('skills', skills)}
           />
         );
-      case 4:
+      case 5:
         return (
           <div className="space-y-6">
             <ResumeScoreCard 

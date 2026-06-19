@@ -323,7 +323,8 @@ STRICT RULES:
 4. The degree name and institution name MUST be explicitly separated into their own fields.
 5. For work experience descriptions, extract the core achievements and format them as a single text block with each bullet point on its own line, prefixed with '• '. Keep them action-oriented and concise.
 6. Extract ALL skills mentioned anywhere in the resume — in dedicated skills sections, within experience descriptions, or in the summary.
-7. For the professional summary, extract the existing summary/objective verbatim. If none exists, return an empty string — do NOT generate one.`;
+7. For the professional summary, extract the existing summary/objective verbatim. If none exists, return an empty string — do NOT generate one.
+8. Strictly separate formal employment (Experience) from personal, academic, or portfolio builds (Projects). If a user built an app or website independently, it MUST go into the projects array, not the experience array.`;
 
 async function parseResumePDF(base64Data) {
   if (!ai) {
@@ -360,6 +361,15 @@ async function parseResumePDF(base64Data) {
           institution: 'Sample University',
           field: 'Computer Science',
           graduationDate: '2021'
+        }
+      ],
+      projects: [
+        {
+          id: crypto.randomUUID(),
+          projectName: 'Sample Project',
+          techStack: 'React, Node.js',
+          link: 'https://github.com/johndoe/sample',
+          description: ['Built a sample project to demonstrate skills.']
         }
       ],
       skills: [
@@ -443,13 +453,31 @@ async function parseResumePDF(base64Data) {
                 required: ['degree', 'institution', 'field', 'graduationDate']
               }
             },
+            projects: {
+              type: Type.ARRAY,
+              description: 'Personal, academic, or portfolio projects',
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  projectName: { type: Type.STRING, description: 'Name of the project' },
+                  techStack: { type: Type.STRING, description: 'Technologies used. Empty string if not provided.' },
+                  link: { type: Type.STRING, description: 'Link to the project (e.g., GitHub, Live URL). Empty string if not provided.' },
+                  description: {
+                    type: Type.ARRAY,
+                    items: { type: Type.STRING },
+                    description: 'Split the project description into distinct bullet points.'
+                  }
+                },
+                required: ['projectName', 'techStack', 'link', 'description']
+              }
+            },
             skills: {
               type: Type.ARRAY,
               description: 'All skills mentioned in the resume as individual strings',
               items: { type: Type.STRING }
             }
           },
-          required: ['personalInfo', 'experience', 'education', 'skills']
+          required: ['personalInfo', 'experience', 'education', 'projects', 'skills']
         }
       }
     });
@@ -486,6 +514,13 @@ async function parseResumePDF(base64Data) {
         institution: edu.institution || '',
         field: edu.field || '',
         graduationDate: edu.graduationDate || ''
+      })) : [],
+      projects: Array.isArray(parsed.projects) ? parsed.projects.map(proj => ({
+        id: crypto.randomUUID(),
+        projectName: proj.projectName || '',
+        techStack: proj.techStack || '',
+        link: proj.link || '',
+        description: Array.isArray(proj.description) ? proj.description : (typeof proj.description === 'string' ? [proj.description] : [])
       })) : [],
       skills: Array.isArray(parsed.skills) ? parsed.skills.map(skill => ({
         id: crypto.randomUUID(),
