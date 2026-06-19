@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ZoomIn, 
@@ -43,6 +43,22 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
   const [showFontPicker, setShowFontPicker] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const previewRef = useRef(null);
+  const containerRef = useRef(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setScale(entry.contentRect.width / 794);
+      }
+    });
+
+    resizeObserver.observe(container);
+    return () => resizeObserver.disconnect();
+  }, []);
 
   const handleZoomIn = () => setZoom(prev => Math.min(prev + 25, 150));
   const handleZoomOut = () => setZoom(prev => Math.max(prev - 25, 50));
@@ -229,49 +245,55 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
 
       {/* Preview Area */}
       <div className="flex-1 overflow-auto p-8 bg-gray-100">
-        <div className="flex justify-center min-h-full">
-          <motion.div
-            ref={previewRef}
-            style={{
-              width: getDeviceWidth(),
-              transform: `scale(${zoom / 100})`,
-              transformOrigin: 'top center',
-              fontFamily: fontOptions.find(f => f.id === fontFamily)?.family,
-            }}
-            className="bg-white shadow-2xl transition-all duration-300"
+        {/* Outer responsive container */}
+        <div ref={containerRef} className="w-full flex justify-center overflow-hidden bg-gray-100 rounded-lg">
+          {/* The scaling wrapper */}
+          <div 
+            className="origin-top flex justify-center transition-all duration-300" 
+            style={{ transform: `scale(${scale * (zoom / 100)})`, height: `${1123 * scale * (zoom / 100)}px` }}
           >
-            {/* Draggable Sections Indicator */}
-            <div className="absolute -left-8 top-0 space-y-2">
-              {['header', 'summary', 'experience', 'education', 'skills'].map((section) => (
-                <motion.div
-                  key={section}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, section)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, section)}
-                  whileHover={{ x: -2 }}
-                  className="flex items-center space-x-1 text-gray-400 cursor-move hover:text-gray-600"
-                  title={`Drag to reorder ${section}`}
-                >
-                  <GripVertical className="h-4 w-4" />
-                  <span className="text-xs capitalize">{section}</span>
-                </motion.div>
-              ))}
-            </div>
+            {/* The STRICT A4 Document */}
+            <div 
+              className="w-[794px] h-[1123px] bg-white shadow-2xl relative overflow-hidden shrink-0"
+              style={{
+                fontFamily: fontOptions.find(f => f.id === fontFamily)?.family,
+              }}
+            >
+              {/* Draggable Sections Indicator */}
+              <div className="absolute left-2 top-2 space-y-2 z-10">
+                {['header', 'summary', 'experience', 'education', 'skills'].map((section) => (
+                  <motion.div
+                    key={section}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, section)}
+                    onDragOver={handleDragOver}
+                    onDrop={(e) => handleDrop(e, section)}
+                    whileHover={{ x: -2 }}
+                    className="flex items-center space-x-1 text-gray-400 bg-white/80 p-1 rounded shadow-sm cursor-move hover:text-gray-600"
+                    title={`Drag to reorder ${section}`}
+                  >
+                    <GripVertical className="h-4 w-4" />
+                    <span className="text-xs capitalize hidden lg:inline">{section}</span>
+                  </motion.div>
+                ))}
+              </div>
 
-            {/* Resume Content */}
-            <div style={{ 
-              '--primary-color': colorThemes.find(t => t.id === colorTheme)?.primary,
-              '--secondary-color': colorThemes.find(t => t.id === colorTheme)?.secondary,
-            }}>
-              <ResumePreview 
-                data={data} 
-                template={template}
-                colorTheme={colorTheme}
-                fontFamily={fontFamily}
-              />
+              {/* Resume Content */}
+              <div style={{ 
+                '--primary-color': colorThemes.find(t => t.id === colorTheme)?.primary,
+                '--secondary-color': colorThemes.find(t => t.id === colorTheme)?.secondary,
+                height: '100%',
+                width: '100%'
+              }}>
+                <ResumePreview 
+                  data={data} 
+                  template={template}
+                  colorTheme={colorTheme}
+                  fontFamily={fontFamily}
+                />
+              </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
 
