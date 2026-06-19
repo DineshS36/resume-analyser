@@ -175,11 +175,10 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
               Job Description (for AI enhancement)
             </label>
             <textarea
-              value={exp.description}
+              value={Array.isArray(exp.description) ? exp.description.join('\n') : exp.description}
               onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
               placeholder="Describe your responsibilities and achievements in simple terms. Our AI will transform this into professional bullet points."
-              rows={3}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all resize-none shadow-sm"
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm h-32 resize-none"
             />
             <div className="flex justify-between items-center mt-2">
               <p className="text-xs text-gray-500">

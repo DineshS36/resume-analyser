@@ -76,7 +76,9 @@ export default function BuildResume() {
     }));
   }, []);
 
-  // Handler for when a PDF is parsed by AI — populates all form sections
+  // Handler for when a PDF is parsed by AI — populates all form sections.
+  // The backend already provides React-ready objects with UUIDs, so we just
+  // pass them through with minimal reshaping.
   const handlePDFParsed = useCallback((parsedData) => {
     setResumeData(prev => ({
       ...prev,
@@ -86,36 +88,18 @@ export default function BuildResume() {
         phone: parsedData.personalInfo?.phone || '',
         location: parsedData.personalInfo?.location || '',
         linkedin: parsedData.personalInfo?.linkedin || '',
-        website: prev.personalInfo?.website || '',
+        website: parsedData.personalInfo?.personalWebsite || prev.personalInfo?.website || '',
       },
       targetJobTitle: parsedData.personalInfo?.targetJobTitle || prev.targetJobTitle || '',
       summary: parsedData.personalInfo?.summary || prev.summary || '',
       experiences: Array.isArray(parsedData.experience) && parsedData.experience.length > 0
-        ? parsedData.experience.map((exp, index) => ({
-            id: `parsed-${Date.now()}-${index}`,
-            company: exp.company || '',
-            role: exp.role || '',
-            location: exp.location || '',
-            startDate: exp.startDate || '',
-            endDate: exp.endDate || '',
-            description: exp.description || '',
-            aiOptimizedBullets: [],
-          }))
+        ? parsedData.experience
         : prev.experiences,
       education: Array.isArray(parsedData.education) && parsedData.education.length > 0
-        ? parsedData.education.map((edu, index) => ({
-            id: `parsed-edu-${Date.now()}-${index}`,
-            degree: edu.degree || '',
-            institution: edu.institution || '',
-            year: edu.year || '',
-            field: edu.field || '',
-          }))
+        ? parsedData.education
         : prev.education,
       skills: Array.isArray(parsedData.skills) && parsedData.skills.length > 0
-        ? parsedData.skills.map((skill, index) => ({
-            id: `parsed-skill-${Date.now()}-${index}`,
-            name: typeof skill === 'string' ? skill : skill.name || '',
-          }))
+        ? parsedData.skills
         : prev.skills,
       template: prev.template,
     }));

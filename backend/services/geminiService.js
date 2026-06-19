@@ -312,7 +312,18 @@ Write a cover letter for this candidate applying to the ${targetJobTitle} positi
 // ---------------------------------------------------------------------------
 // 5. Parse Resume PDF  (Multimodal — inlineData + Structured Output)
 // ---------------------------------------------------------------------------
-const PARSE_PDF_SYSTEM_PROMPT = `You are an expert resume parser. You will receive a PDF resume. Extract ALL information from it and return structured JSON. Be thorough — capture every detail including full name, contact info, work experiences, education, and skills. For dates, use the format as written in the resume (e.g., "Jan 2020", "2020-01", "January 2020"). If a field is not found in the resume, return an empty string or empty array as appropriate.`;
+const crypto = require('crypto');
+
+const PARSE_PDF_SYSTEM_PROMPT = `You are an expert ATS data extraction engine. You will receive a PDF resume. Extract ALL information from it and return structured JSON.
+
+STRICT RULES:
+1. Dates MUST be in 'MMM YYYY' format (e.g., 'Jan 2021', 'Dec 2019'). If the position is current, use 'Present' for the end date.
+2. Do NOT hallucinate data. If a field (like LinkedIn, phone, or a specific date) is missing from the PDF, return an empty string ''.
+3. The job title (role) and company name MUST be explicitly separated into their own fields. Never combine them.
+4. The degree name and institution name MUST be explicitly separated into their own fields.
+5. For work experience descriptions, extract the core achievements and format them as a single text block with each bullet point on its own line, prefixed with '• '. Keep them action-oriented and concise.
+6. Extract ALL skills mentioned anywhere in the resume — in dedicated skills sections, within experience descriptions, or in the summary.
+7. For the professional summary, extract the existing summary/objective verbatim. If none exists, return an empty string — do NOT generate one.`;
 
 async function parseResumePDF(base64Data) {
   if (!ai) {
@@ -328,23 +339,36 @@ async function parseResumePDF(base64Data) {
       },
       experience: [
         {
+          id: crypto.randomUUID(),
           company: 'Sample Company',
           role: 'Software Engineer',
           location: 'New York, NY',
           startDate: 'Jan 2022',
           endDate: 'Present',
-          description: 'Developed and maintained web applications using React and Node.js.'
+          description: [
+            'Developed and maintained web applications using React and Node.js.',
+            'Implemented RESTful APIs serving 10,000+ daily requests.',
+            'Reduced page load time by 40% through performance optimizations.'
+          ],
+          aiOptimizedBullets: []
         }
       ],
       education: [
         {
-          degree: 'Bachelor of Science in Computer Science',
+          id: crypto.randomUUID(),
+          degree: 'Bachelor of Science',
           institution: 'Sample University',
-          year: '2021',
-          field: 'Computer Science'
+          field: 'Computer Science',
+          graduationDate: '2021'
         }
       ],
-      skills: ['JavaScript', 'React', 'Node.js', 'Python', 'SQL']
+      skills: [
+        { id: crypto.randomUUID(), name: 'JavaScript' },
+        { id: crypto.randomUUID(), name: 'React' },
+        { id: crypto.randomUUID(), name: 'Node.js' },
+        { id: crypto.randomUUID(), name: 'Python' },
+        { id: crypto.randomUUID(), name: 'SQL' }
+      ]
     };
   }
 
@@ -378,24 +402,29 @@ async function parseResumePDF(base64Data) {
                 email: { type: Type.STRING, description: 'Email address' },
                 phone: { type: Type.STRING, description: 'Phone number' },
                 location: { type: Type.STRING, description: 'City, State or full address' },
-                linkedin: { type: Type.STRING, description: 'LinkedIn profile URL' },
-                targetJobTitle: { type: Type.STRING, description: 'Current or most recent job title, or the title from the resume header' },
-                summary: { type: Type.STRING, description: 'Professional summary or objective statement from the resume' }
+                linkedin: { type: Type.STRING, description: 'LinkedIn profile URL. Empty string if not found.' },
+                personalWebsite: { type: Type.STRING, description: 'Extract any portfolio, GitHub, or personal website URLs. Exclude LinkedIn.' },
+                targetJobTitle: { type: Type.STRING, description: 'The most recent or prominent job title from the resume' },
+                summary: { type: Type.STRING, description: 'Professional summary or objective from the resume. Empty string if none exists.' }
               },
               required: ['fullName', 'email', 'phone', 'location', 'linkedin', 'targetJobTitle', 'summary']
             },
             experience: {
               type: Type.ARRAY,
-              description: 'Work experience entries',
+              description: 'Work experience entries, ordered from most recent to oldest',
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  company: { type: Type.STRING, description: 'Company or organization name' },
-                  role: { type: Type.STRING, description: 'Job title or role' },
-                  location: { type: Type.STRING, description: 'Location of the job' },
-                  startDate: { type: Type.STRING, description: 'Start date as written on the resume' },
-                  endDate: { type: Type.STRING, description: 'End date as written, or "Present" if current' },
-                  description: { type: Type.STRING, description: 'Full description including all bullet points, joined as a single text block' }
+                  company: { type: Type.STRING, description: 'Company or organization name only' },
+                  role: { type: Type.STRING, description: 'Job title or role only — never combined with company name' },
+                  location: { type: Type.STRING, description: 'Location of the job. Empty string if not listed.' },
+                  startDate: { type: Type.STRING, description: 'Start date in MMM YYYY format (e.g., Jan 2021)' },
+                  endDate: { type: Type.STRING, description: 'End date in MMM YYYY format, or "Present" if current' },
+                  description: { 
+                    type: Type.ARRAY, 
+                    items: { type: Type.STRING },
+                    description: 'Split the job duties into distinct, individual bullet points. Do not include • characters.'
+                  }
                 },
                 required: ['company', 'role', 'location', 'startDate', 'endDate', 'description']
               }
@@ -406,17 +435,17 @@ async function parseResumePDF(base64Data) {
               items: {
                 type: Type.OBJECT,
                 properties: {
-                  degree: { type: Type.STRING, description: 'Degree name (e.g., Bachelor of Science)' },
+                  degree: { type: Type.STRING, description: 'Degree name only (e.g., Bachelor of Science) — not combined with field' },
                   institution: { type: Type.STRING, description: 'University or institution name' },
-                  year: { type: Type.STRING, description: 'Graduation year or date range' },
-                  field: { type: Type.STRING, description: 'Field of study or major' }
+                  field: { type: Type.STRING, description: 'Field of study or major' },
+                  graduationDate: { type: Type.STRING, description: 'Graduation year or date in MMM YYYY format' }
                 },
-                required: ['degree', 'institution', 'year', 'field']
+                required: ['degree', 'institution', 'field', 'graduationDate']
               }
             },
             skills: {
               type: Type.ARRAY,
-              description: 'List of skills extracted from the resume',
+              description: 'All skills mentioned in the resume as individual strings',
               items: { type: Type.STRING }
             }
           },
@@ -427,7 +456,9 @@ async function parseResumePDF(base64Data) {
 
     const parsed = JSON.parse(response.text);
 
-    // Normalise — ensure every expected field exists
+    // ---------------------------------------------------------------------------
+    // Normalise + inject React-ready UUIDs for every array item
+    // ---------------------------------------------------------------------------
     return {
       personalInfo: {
         fullName: parsed.personalInfo?.fullName || '',
@@ -435,24 +466,31 @@ async function parseResumePDF(base64Data) {
         phone: parsed.personalInfo?.phone || '',
         location: parsed.personalInfo?.location || '',
         linkedin: parsed.personalInfo?.linkedin || '',
+        personalWebsite: parsed.personalInfo?.personalWebsite || '',
         targetJobTitle: parsed.personalInfo?.targetJobTitle || '',
         summary: parsed.personalInfo?.summary || ''
       },
       experience: Array.isArray(parsed.experience) ? parsed.experience.map(exp => ({
+        id: crypto.randomUUID(),
         company: exp.company || '',
         role: exp.role || '',
         location: exp.location || '',
         startDate: exp.startDate || '',
         endDate: exp.endDate || '',
-        description: exp.description || ''
+        description: Array.isArray(exp.description) ? exp.description : (typeof exp.description === 'string' ? [exp.description] : []),
+        aiOptimizedBullets: []
       })) : [],
       education: Array.isArray(parsed.education) ? parsed.education.map(edu => ({
+        id: crypto.randomUUID(),
         degree: edu.degree || '',
         institution: edu.institution || '',
-        year: edu.year || '',
-        field: edu.field || ''
+        field: edu.field || '',
+        graduationDate: edu.graduationDate || ''
       })) : [],
-      skills: Array.isArray(parsed.skills) ? parsed.skills : []
+      skills: Array.isArray(parsed.skills) ? parsed.skills.map(skill => ({
+        id: crypto.randomUUID(),
+        name: typeof skill === 'string' ? skill : String(skill)
+      })) : []
     };
   } catch (error) {
     console.error('Error parsing resume PDF:', error);

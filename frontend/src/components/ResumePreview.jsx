@@ -66,7 +66,22 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <p className="text-sm text-gray-700 mt-2">{exp.description}</p>
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -178,7 +193,22 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <p className="text-sm text-gray-700 mt-2">{exp.description}</p>
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -284,7 +314,22 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <p className="text-sm text-gray-600">{exp.description}</p>
+                  <div className="text-sm text-gray-600">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -395,8 +440,23 @@ export default function ResumePreview({ data, template }) {
                       ))}
                     </ul>
                   ) : exp.description ? (
-                    <p className="text-sm text-gray-700">{exp.description}</p>
-                  ) : null}
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
                 </div>
               ))}
             </div>
@@ -480,7 +540,22 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <p className="text-sm text-slate-700 mt-2">{exp.description}</p>
+                  <div className="text-sm text-slate-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -602,7 +677,22 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <p className="text-sm text-gray-700 mt-2">{exp.description}</p>
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -690,7 +780,22 @@ export default function ResumePreview({ data, template }) {
                     ))}
                   </ul>
                 ) : exp.description ? (
-                  <p className="text-sm text-gray-700 mt-2">{exp.description}</p>
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
                 ) : null}
               </div>
             ))}
@@ -784,7 +889,24 @@ export default function ResumePreview({ data, template }) {
                     <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-sm text-gray-600">{exp.company}</p></div>
                     <div className="text-right text-xs text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p></div>
                   </div>
-                  {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (<p className="text-sm text-gray-700 mt-2">{exp.description}</p>) : null}
+                  {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
                 </div>
               ))}
             </div>
@@ -818,7 +940,24 @@ export default function ResumePreview({ data, template }) {
                   <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-emerald-600 font-medium">{exp.company}</p></div>
                   <div className="text-right text-sm text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p></div>
                 </div>
-                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (<p className="text-sm text-gray-700 mt-2">{exp.description}</p>) : null}
+                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -848,7 +987,24 @@ export default function ResumePreview({ data, template }) {
                   <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-orange-600 font-medium">{exp.company}</p></div>
                   <div className="text-right text-sm text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</p></div>
                 </div>
-                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2 text-gray-700">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx}>{bullet}</li>))}</ul>) : exp.description ? (<p className="text-sm text-gray-700 mt-2">{exp.description}</p>) : null}
+                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2 text-gray-700">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx}>{bullet}</li>))}</ul>) : exp.description ? (
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -878,7 +1034,24 @@ export default function ResumePreview({ data, template }) {
                   <div><h3 className="font-bold text-gray-900">{exp.role}</h3><p className="text-cyan-700 font-medium">{exp.company}</p></div>
                   <div className="text-right text-sm text-gray-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} - {exp.endDate || 'Present'}</p></div>
                 </div>
-                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (<p className="text-sm text-gray-700 mt-2">{exp.description}</p>) : null}
+                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx} className="text-gray-700">{bullet}</li>))}</ul>) : exp.description ? (
+                  <div className="text-sm text-gray-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
@@ -908,7 +1081,24 @@ export default function ResumePreview({ data, template }) {
                   <div><h3 className="font-bold text-slate-900">{exp.role}</h3><p className="text-slate-600 font-medium">{exp.company}</p></div>
                   <div className="text-right text-sm text-slate-500"><p>{exp.location}</p><p>{formatDate(exp.startDate)} — {exp.endDate || 'Present'}</p></div>
                 </div>
-                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2 text-slate-700">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx}>{bullet}</li>))}</ul>) : exp.description ? (<p className="text-sm text-slate-700 mt-2">{exp.description}</p>) : null}
+                {exp.aiOptimizedBullets?.length > 0 ? (<ul className="list-disc list-inside text-sm space-y-1 mt-2 text-slate-700">{exp.aiOptimizedBullets.map((bullet, idx) => (<li key={idx}>{bullet}</li>))}</ul>) : exp.description ? (
+                  <div className="text-sm text-slate-700 mt-2">
+                    {Array.isArray(exp.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-400">
+                        {exp.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]\s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="leading-relaxed">{exp.description}</p>
+                    )}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
