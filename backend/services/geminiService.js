@@ -28,6 +28,8 @@ Evaluate the resume on these criteria:
 
 const COVER_LETTER_SYSTEM_PROMPT = `You are a professional cover letter writer. Write a compelling, personalised cover letter. Keep it to 3-4 paragraphs. Use a professional but engaging tone. Do not include placeholder brackets — fill in real information from the provided data.`;
 
+const ATS_MATCH_SYSTEM_PROMPT = `Compare the provided resume data against the job description. Extract hard technical skills, tools, and exact industry keywords. Identify which keywords are present in the resume and which are missing. Provide a strict, objective match score (0-100) based strictly on the ratio of matched vs. missing keywords.`;
+
 // ---------------------------------------------------------------------------
 // 1. Generate Bullet Points  (Structured Output — JSON array of 3 strings)
 // ---------------------------------------------------------------------------
@@ -532,6 +534,52 @@ async function parseResumePDF(base64Data) {
 }
 
 // ---------------------------------------------------------------------------
+// 5. Analyze ATS Match
+// ---------------------------------------------------------------------------
+async function analyzeATS(resumeData, jobDescription) {
+  if (!ai) {
+    return {
+      matchScore: 65,
+      matchedKeywords: ["React", "Node.js", "JavaScript"],
+      missingKeywords: ["TypeScript", "AWS", "Docker"],
+      recommendations: [
+        "Include TypeScript in your skills section and mention it in project descriptions.",
+        "Highlight any cloud experience with AWS.",
+        "Add Docker to your list of tools."
+      ]
+    };
+  }
+
+  try {
+    const prompt = `${ATS_MATCH_SYSTEM_PROMPT}\n\nJob Description:\n${jobDescription}\n\nResume Data:\n${JSON.stringify(resumeData, null, 2)}\n\nAnalyze the ATS match:`;
+
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: {
+        temperature: 0.1,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            matchScore: { type: Type.INTEGER, description: "ATS compatibility score from 0 to 100" },
+            matchedKeywords: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Keywords found in both the JD and the resume" },
+            missingKeywords: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Crucial keywords in the JD missing from the resume" },
+            recommendations: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Actionable 1-sentence tips to improve the resume for this specific JD" }
+          },
+          required: ["matchScore", "matchedKeywords", "missingKeywords", "recommendations"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text);
+  } catch (error) {
+    console.error('Error analyzing ATS match:', error);
+    throw new Error('Failed to analyze ATS match with AI. ' + error.message);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 module.exports = {
@@ -539,6 +587,6 @@ module.exports = {
   generateProfessionalSummary,
   analyzeResume,
   generateCoverLetter,
+  analyzeATS,
   parseResumePDF
 };
-

@@ -16,6 +16,9 @@ import {
 } from 'lucide-react';
 import ResumePreview from './ResumePreview';
 import TemplateSelector from './TemplateSelector';
+import { useReactToPrint } from 'react-to-print';
+import { analyzeAtsMatch } from '@/lib/api';
+import toast from 'react-hot-toast';
 
 
 const colorThemes = [
@@ -44,8 +47,43 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
   const [isDragging, setIsDragging] = useState(false);
   const previewRef = useRef(null);
   const containerRef = useRef(null);
+  const documentRef = useRef(null);
   const [scale, setScale] = useState(1);
   const [isThemeModalOpen, setIsThemeModalOpen] = useState(false);
+  const [isAtsModalOpen, setIsAtsModalOpen] = useState(false);
+  const [jobDescription, setJobDescription] = useState('');
+  const [atsResults, setAtsResults] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const handleDownloadPdf = useReactToPrint({
+    contentRef: documentRef,
+    documentTitle: data?.personalInfo?.fullName ? `${data.personalInfo.fullName}_Resume` : 'Resume',
+    pageStyle: `
+      @page { size: A4; margin: 0; }
+      @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    `,
+  });
+
+  const handleAnalyzeAts = async () => {
+    if (!jobDescription.trim()) {
+      toast.error('Please paste a Job Description first.');
+      return;
+    }
+    
+    try {
+      setIsAnalyzing(true);
+      const res = await analyzeAtsMatch(data, jobDescription);
+      if (res && res.analysis) {
+        setAtsResults(res.analysis);
+        toast.success('ATS Match completed successfully!');
+      }
+    } catch (error) {
+      toast.error('Failed to analyze ATS match. Please try again.');
+      console.error(error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   useEffect(() => {
     const container = containerRef.current;
@@ -149,6 +187,13 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
 
           {/* Right: Customization */}
           <div className="flex items-center space-x-2">
+            {/* ATS Match Modal Trigger */}
+            <button
+              onClick={() => setIsAtsModalOpen(true)}
+              className="flex items-center space-x-2 px-3 py-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors font-medium"
+            >
+              <span className="text-sm">🔍 ATS Match</span>
+            </button>
             {/* Theme / Template Modal Trigger */}
             <div className="relative">
               <button
@@ -233,7 +278,7 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
 
              {/* Download PDF Button */}
             <button
-              onClick={onDownloadPDF}
+              onClick={handleDownloadPdf}
               className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
             >
               <Download className="h-4 w-4" />
@@ -255,7 +300,8 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
           >
             {/* The STRICT A4 Document */}
             <div 
-              className="w-[794px] min-h-[1123px] bg-white shadow-2xl relative shrink-0"
+              ref={documentRef}
+              className="w-[794px] min-h-[1123px] bg-white relative shrink-0 print:shadow-none shadow-2xl"
               style={{
                 fontFamily: fontOptions.find(f => f.id === fontFamily)?.family,
                 backgroundImage: 'repeating-linear-gradient(transparent, transparent 1122px, #e5e7eb 1122px, #e5e7eb 1124px)'
@@ -299,6 +345,122 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
                 setIsThemeModalOpen(false);
               }} 
             />
+          </div>
+        </div>
+      )}
+
+      {/* ATS Match Modal */}
+      {isAtsModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6 relative">
+            <button 
+              onClick={() => setIsAtsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-500 hover:text-black p-2 bg-gray-100 rounded-full"
+            >
+              ✕
+            </button>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">ATS Match Analyzer</h2>
+            
+            {!atsResults ? (
+              <div className="space-y-4">
+                <p className="text-gray-600">Paste the Job Description below to see how well your resume matches.</p>
+                <textarea
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  placeholder="Paste Job Description here..."
+                  className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 resize-none"
+                />
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleAnalyzeAts}
+                    disabled={isAnalyzing}
+                    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 font-medium flex items-center space-x-2"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <span className="animate-spin text-xl">⏳</span>
+                        <span>Analyzing...</span>
+                      </>
+                    ) : (
+                      <span>Analyze Resume</span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {/* Score */}
+                <div className="flex flex-col items-center p-6 bg-gray-50 rounded-xl border border-gray-100">
+                  <span className="text-gray-500 font-medium mb-2">Match Score</span>
+                  <div className={`text-6xl font-bold ${
+                    atsResults.matchScore < 50 ? 'text-red-500' :
+                    atsResults.matchScore < 75 ? 'text-yellow-500' : 'text-green-500'
+                  }`}>
+                    {atsResults.matchScore}%
+                  </div>
+                </div>
+
+                {/* Keywords */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-green-50 p-6 rounded-xl border border-green-100">
+                    <h3 className="font-semibold text-green-800 mb-4 flex items-center">
+                      <span className="mr-2">✅</span> Matched Skills
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {atsResults.matchedKeywords?.map((kw, i) => (
+                        <span key={i} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                          {kw}
+                        </span>
+                      ))}
+                      {(!atsResults.matchedKeywords || atsResults.matchedKeywords.length === 0) && (
+                        <span className="text-gray-500 italic text-sm">No exact matches found.</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-red-50 p-6 rounded-xl border border-red-100">
+                    <h3 className="font-semibold text-red-800 mb-4 flex items-center">
+                      <span className="mr-2">❌</span> Missing Skills
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {atsResults.missingKeywords?.map((kw, i) => (
+                        <span key={i} className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                          {kw}
+                        </span>
+                      ))}
+                      {(!atsResults.missingKeywords || atsResults.missingKeywords.length === 0) && (
+                        <span className="text-gray-500 italic text-sm">No missing keywords!</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Recommendations */}
+                <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                  <h3 className="font-semibold text-blue-800 mb-4 flex items-center">
+                    <span className="mr-2">💡</span> Recommendations
+                  </h3>
+                  <ul className="space-y-3">
+                    {atsResults.recommendations?.map((rec, i) => (
+                      <li key={i} className="flex items-start text-blue-900">
+                        <span className="mr-3 mt-1">•</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="flex justify-end pt-4">
+                  <button
+                    onClick={() => setAtsResults(null)}
+                    className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium"
+                  >
+                    Check Another Job
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

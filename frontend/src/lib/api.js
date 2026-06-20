@@ -82,6 +82,19 @@ export const analyzeResume = async (resumeData) => {
   }
 };
 
+export const analyzeAtsMatch = async (resumeData, jobDescription) => {
+  try {
+    const response = await api.post('/api/analyze-ats', {
+      resumeData,
+      jobDescription
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error analyzing ATS match:', error);
+    throw error;
+  }
+};
+
 export const generateCoverLetter = async (personalInfo, targetJobTitle, summary, experiences, skills, tone = 'professional') => {
   try {
     const response = await api.post('/api/generate-cover-letter', {

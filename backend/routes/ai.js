@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const verifyToken = require('../middleware/auth');
-const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, parseResumePDF } = require('../services/geminiService');
+const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, analyzeATS, parseResumePDF } = require('../services/geminiService');
 
 // Configure multer for in-memory file uploads (no disk writes)
 const upload = multer({
@@ -113,6 +113,33 @@ router.post('/analyze-resume', async (req, res) => {
         console.error('Analyze resume error:', error);
         res.status(500).json({ 
             error: 'Failed to analyze resume',
+            message: error.message 
+        });
+    }
+});
+
+// POST /analyze-ats
+// Accepts full resume data and a job description, returns ATS match analysis
+router.post('/analyze-ats', async (req, res) => {
+    try {
+        const { resumeData, jobDescription } = req.body;
+        
+        if (!resumeData || !jobDescription) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: resumeData and jobDescription' 
+            });
+        }
+        
+        const analysis = await analyzeATS(resumeData, jobDescription);
+        
+        res.json({
+            success: true,
+            analysis: analysis
+        });
+    } catch (error) {
+        console.error('Analyze ATS error:', error);
+        res.status(500).json({ 
+            error: 'Failed to analyze ATS match',
             message: error.message 
         });
     }
