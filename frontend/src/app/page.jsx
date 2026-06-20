@@ -291,16 +291,13 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <Sparkles className="h-6 w-6 text-primary-400" />
-              <span className="text-lg font-semibold text-white">AI Resume Builder</span>
-            </div>
-            <p className="text-sm">
-              © 2024 AI Resume Builder. All rights reserved.
-            </p>
+      <footer className="bg-slate-950 text-slate-300 py-8 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+          <div className="flex items-center gap-2 font-bold text-white">
+            <Sparkles className="h-5 w-5" /> AI Resume Builder
+          </div>
+          <div className="text-sm mt-4 md:mt-0">
+            © {new Date().getFullYear()} AI Resume Builder. All rights reserved.
           </div>
         </div>
       </footer>
