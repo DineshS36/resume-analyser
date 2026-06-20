@@ -58,6 +58,19 @@ export const generateBulletPoints = async (rawInput, targetJobTitle) => {
   }
 };
 
+export const enhanceBulletPoint = async (originalText, keywords = []) => {
+  try {
+    const response = await api.post('/api/enhance-bullet', {
+      originalText,
+      keywords,
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error enhancing bullet point:', error);
+    throw error;
+  }
+};
+
 export const generateSummary = async (experiences, skills, targetJobTitle) => {
   try {
     const response = await api.post('/api/generate-summary', {

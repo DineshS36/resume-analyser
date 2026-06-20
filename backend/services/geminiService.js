@@ -30,6 +30,8 @@ const COVER_LETTER_SYSTEM_PROMPT = `You are a professional cover letter writer. 
 
 const ATS_MATCH_SYSTEM_PROMPT = `Compare the provided resume data against the job description. Extract hard technical skills, tools, and exact industry keywords. Identify which keywords are present in the resume and which are missing. Provide a strict, objective match score (0-100) based strictly on the ratio of matched vs. missing keywords.`;
 
+const ENHANCE_BULLET_SYSTEM_PROMPT = `Act as an elite executive resume writer. Rewrite the provided bullet point to be highly professional, impactful, and metric-driven using the STAR method (Situation, Task, Action, Result). It MUST remain a single sentence. Do not use first-person pronouns (I, me). If 'keywords' are provided, naturally integrate as many of them as logically possible without sounding robotic.`;
+
 // ---------------------------------------------------------------------------
 // 1. Generate Bullet Points  (Structured Output — JSON array of 3 strings)
 // ---------------------------------------------------------------------------
@@ -580,6 +582,41 @@ async function analyzeATS(resumeData, jobDescription) {
 }
 
 // ---------------------------------------------------------------------------
+// 6. Enhance Bullet Point Inline
+// ---------------------------------------------------------------------------
+async function enhanceBullet(originalText, keywords = []) {
+  if (!ai) {
+    return { enhancedBullet: "Enhanced sample bullet (API key missing)." };
+  }
+
+  try {
+    const keywordText = keywords && keywords.length > 0 ? `Keywords to include if possible: ${keywords.join(', ')}\n` : '';
+    const prompt = `${ENHANCE_BULLET_SYSTEM_PROMPT}\n\n${keywordText}Original Bullet: ${originalText}\n\nEnhanced Bullet:`;
+
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: {
+        temperature: 0.2,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          properties: {
+            enhancedBullet: { type: Type.STRING, description: "The single-sentence rewritten bullet point." }
+          },
+          required: ["enhancedBullet"]
+        }
+      }
+    });
+
+    return JSON.parse(response.text);
+  } catch (error) {
+    console.error('Error enhancing bullet point:', error);
+    throw new Error('Failed to enhance bullet point. ' + error.message);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 module.exports = {
@@ -588,5 +625,6 @@ module.exports = {
   analyzeResume,
   generateCoverLetter,
   analyzeATS,
-  parseResumePDF
+  parseResumePDF,
+  enhanceBullet
 };

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const verifyToken = require('../middleware/auth');
-const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, analyzeATS, parseResumePDF } = require('../services/geminiService');
+const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, analyzeATS, parseResumePDF, enhanceBullet } = require('../services/geminiService');
 
 // Configure multer for in-memory file uploads (no disk writes)
 const upload = multer({
@@ -39,6 +39,33 @@ router.post('/generate-bullet', async (req, res) => {
         console.error('Generate bullet error:', error);
         res.status(500).json({ 
             error: 'Failed to generate bullet points',
+            message: error.message 
+        });
+    }
+});
+
+// POST /api/enhance-bullet
+// Enhances a single bullet point using the STAR method
+router.post('/enhance-bullet', async (req, res) => {
+    try {
+        const { originalText, keywords } = req.body;
+        
+        if (!originalText) {
+            return res.status(400).json({ 
+                error: 'Missing required field: originalText' 
+            });
+        }
+        
+        const result = await enhanceBullet(originalText, keywords);
+        
+        res.json({
+            success: true,
+            enhancedBullet: result.enhancedBullet
+        });
+    } catch (error) {
+        console.error('Enhance bullet error:', error);
+        res.status(500).json({ 
+            error: 'Failed to enhance bullet point',
             message: error.message 
         });
     }

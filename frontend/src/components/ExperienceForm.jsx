@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { Plus, Trash2, Sparkles, Building2, Calendar, MapPin, Loader2, Wand2, Check, X } from 'lucide-react';
-import { generateBulletPoints } from '@/lib/api';
+import { generateBulletPoints, enhanceBulletPoint } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function ExperienceForm({ experiences, onChange, targetJobTitle }) {
   const [generatingForId, setGeneratingForId] = useState(null);
+  const [enhancingBullet, setEnhancingBullet] = useState(null);
   const [suggestions, setSuggestions] = useState({});
 
   const addExperience = () => {
@@ -82,6 +83,48 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
   const removeBullet = (expId, bullet) => {
     const exp = experiences.find(e => e.id === expId);
     updateExperience(expId, 'aiOptimizedBullets', exp.aiOptimizedBullets.filter(b => b !== bullet));
+  };
+
+  const handleEnhanceBullet = async (expId, bulletIndex, currentText) => {
+    if (!currentText || currentText.trim().length < 5) {
+      toast.error('Please enter at least 5 characters to enhance.');
+      return;
+    }
+    
+    setEnhancingBullet(`${expId}-${bulletIndex}`);
+    try {
+      const res = await enhanceBulletPoint(currentText, []);
+      const exp = experiences.find(e => e.id === expId);
+      const descArray = Array.isArray(exp.description) ? [...exp.description] : (exp.description || '').split('\n');
+      descArray[bulletIndex] = res.enhancedBullet;
+      updateExperience(expId, 'description', descArray);
+      toast.success('Bullet enhanced!', { icon: '✨' });
+    } catch (error) {
+      toast.error('Failed to enhance bullet.');
+    } finally {
+      setEnhancingBullet(null);
+    }
+  };
+
+  const updateDescBullet = (expId, bulletIndex, newValue) => {
+    const exp = experiences.find(e => e.id === expId);
+    const descArray = Array.isArray(exp.description) ? [...exp.description] : (exp.description || '').split('\n');
+    descArray[bulletIndex] = newValue;
+    updateExperience(expId, 'description', descArray);
+  };
+
+  const addDescBullet = (expId) => {
+    const exp = experiences.find(e => e.id === expId);
+    const descArray = Array.isArray(exp.description) ? [...exp.description] : (exp.description || '').split('\n');
+    descArray.push('');
+    updateExperience(expId, 'description', descArray);
+  };
+
+  const removeDescBulletIndex = (expId, bulletIndex) => {
+    const exp = experiences.find(e => e.id === expId);
+    const descArray = Array.isArray(exp.description) ? [...exp.description] : (exp.description || '').split('\n');
+    descArray.splice(bulletIndex, 1);
+    updateExperience(expId, 'description', descArray);
   };
 
   return (
@@ -169,39 +212,64 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
             </div>
           </div>
 
-          {/* Raw Description */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Job Description (for AI enhancement)
-            </label>
-            <textarea
-              value={Array.isArray(exp.description) ? exp.description.join('\n') : (exp.description || '')}
-              onChange={(e) => updateExperience(exp.id, 'description', e.target.value)}
-              placeholder="Describe your responsibilities and achievements in simple terms. Our AI will transform this into professional bullet points."
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm h-32 resize-none text-gray-900 placeholder-gray-400"
-            />
-            <div className="flex justify-between items-center mt-2">
-              <p className="text-xs text-gray-500">
-                {exp.description.length}/500 characters
-              </p>
+          {/* Bullet Points */}
+          <div className="mb-4 space-y-3">
+            <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between items-end">
+              <span>Job Description Bullets</span>
               <button
                 onClick={() => handleGenerateBullets(exp)}
-                disabled={generatingForId === exp.id || !exp.description}
-                className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-sm font-medium rounded-lg shadow-md hover:shadow-lg hover:scale-105 transition-all disabled:opacity-50"
+                disabled={generatingForId === exp.id || !exp.description || exp.description.length === 0}
+                className="flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium rounded shadow-md hover:shadow-lg transition-all disabled:opacity-50"
+                title="Generate new bullets based on your text"
               >
                 {generatingForId === exp.id ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Enhancing...
-                  </>
+                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                 ) : (
-                  <>
-                    <Wand2 className="h-4 w-4 mr-2" />
-                    Enhance with AI
-                  </>
+                  <Sparkles className="h-3 w-3 mr-1" />
                 )}
+                Auto-Generate Ideas
               </button>
-            </div>
+            </label>
+            
+            {(Array.isArray(exp.description) ? exp.description : (exp.description || '').split('\n')).map((bullet, bIndex) => {
+              const isEnhancing = enhancingBullet === `${exp.id}-${bIndex}`;
+              return (
+                <div key={bIndex} className="flex items-start space-x-2">
+                  <div className="flex-1 relative">
+                    <textarea
+                      value={bullet}
+                      onChange={(e) => updateDescBullet(exp.id, bIndex, e.target.value)}
+                      disabled={isEnhancing}
+                      placeholder="Describe a key responsibility or achievement..."
+                      className="w-full px-4 py-2 rounded-lg border-2 border-gray-200 focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm resize-none text-gray-900 placeholder-gray-400 min-h-[60px]"
+                    />
+                  </div>
+                  <div className="flex flex-col space-y-1">
+                    <button
+                      onClick={() => handleEnhanceBullet(exp.id, bIndex, bullet)}
+                      disabled={isEnhancing || !bullet.trim()}
+                      className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition-colors disabled:opacity-50"
+                      title="Enhance with AI"
+                    >
+                      {isEnhancing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
+                    </button>
+                    <button
+                      onClick={() => removeDescBulletIndex(exp.id, bIndex)}
+                      className="p-2 bg-red-100 hover:bg-red-200 text-red-700 rounded-lg transition-colors"
+                      title="Remove Bullet"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+            <button
+              onClick={() => addDescBullet(exp.id)}
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center mt-2"
+            >
+              <Plus className="h-4 w-4 mr-1" /> Add Bullet
+            </button>
           </div>
 
           {/* AI Suggestions */}
