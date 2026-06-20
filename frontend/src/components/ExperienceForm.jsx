@@ -6,9 +6,7 @@ import { generateBulletPoints, enhanceBulletPoint } from '@/lib/api';
 import toast from 'react-hot-toast';
 
 export default function ExperienceForm({ experiences, onChange, targetJobTitle }) {
-  const [generatingForId, setGeneratingForId] = useState(null);
   const [enhancingBullet, setEnhancingBullet] = useState(null);
-  const [suggestions, setSuggestions] = useState({});
 
   const addExperience = () => {
     const newExp = {
@@ -38,52 +36,6 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
     }
   };
 
-  const handleGenerateBullets = async (exp) => {
-    if (!exp.description || exp.description.trim().length < 10) {
-      toast.error('Please enter a description first (at least 10 characters)', { icon: '⚠️' });
-      return;
-    }
-
-    setGeneratingForId(exp.id);
-    const loadingToast = toast.loading('AI is optimizing your bullet points...', { icon: '🤖' });
-
-    try {
-      const response = await generateBulletPoints(exp.description, targetJobTitle || 'Professional');
-      setSuggestions({
-        ...suggestions,
-        [exp.id]: response.bullets,
-      });
-      toast.dismiss(loadingToast);
-      toast.success('Suggestions ready! Choose your favorites.', { icon: '✨' });
-    } catch (error) {
-      console.error('Error generating bullets:', error);
-      toast.dismiss(loadingToast);
-      toast.error('Failed to generate suggestions. Please try again.', { icon: '❌' });
-    } finally {
-      setGeneratingForId(null);
-    }
-  };
-
-  const acceptSuggestion = (expId, bullet) => {
-    const exp = experiences.find(e => e.id === expId);
-    const currentBullets = exp.aiOptimizedBullets || [];
-    if (!currentBullets.includes(bullet)) {
-      updateExperience(expId, 'aiOptimizedBullets', [...currentBullets, bullet]);
-      toast.success('Bullet point added!', { icon: '✅' });
-    }
-  };
-
-  const rejectSuggestion = (expId, bullet) => {
-    setSuggestions({
-      ...suggestions,
-      [expId]: suggestions[expId].filter(b => b !== bullet),
-    });
-  };
-
-  const removeBullet = (expId, bullet) => {
-    const exp = experiences.find(e => e.id === expId);
-    updateExperience(expId, 'aiOptimizedBullets', exp.aiOptimizedBullets.filter(b => b !== bullet));
-  };
 
   const handleEnhanceBullet = async (expId, bulletIndex, currentText) => {
     if (!currentText || currentText.trim().length < 5) {
@@ -214,21 +166,8 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
 
           {/* Bullet Points */}
           <div className="mb-4 space-y-3">
-            <label className="block text-sm font-medium text-gray-700 mb-1 flex justify-between items-end">
-              <span>Job Description Bullets</span>
-              <button
-                onClick={() => handleGenerateBullets(exp)}
-                disabled={generatingForId === exp.id || !exp.description || exp.description.length === 0}
-                className="flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-medium rounded shadow-md hover:shadow-lg transition-all disabled:opacity-50"
-                title="Generate new bullets based on your text"
-              >
-                {generatingForId === exp.id ? (
-                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                ) : (
-                  <Sparkles className="h-3 w-3 mr-1" />
-                )}
-                Auto-Generate Ideas
-              </button>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Job Description Bullets
             </label>
             
             {(Array.isArray(exp.description) ? exp.description : (exp.description || '').split('\n')).map((bullet, bIndex) => {
@@ -272,65 +211,6 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
             </button>
           </div>
 
-          {/* AI Suggestions */}
-          {suggestions[exp.id] && suggestions[exp.id].length > 0 && (
-            <div className="mb-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-lg p-4">
-              <h4 className="text-sm font-semibold text-purple-900 mb-3 flex items-center">
-                <Sparkles className="h-4 w-4 mr-2" />
-                AI Suggestions - Click to add:
-              </h4>
-              <div className="space-y-2">
-                {suggestions[exp.id].map((bullet, idx) => (
-                  <div
-                    key={idx}
-                    className="flex items-start justify-between bg-white p-3 rounded-lg shadow-sm group hover:shadow-md transition-all"
-                  >
-                    <p className="text-sm text-gray-700 flex-1 mr-2">• {bullet}</p>
-                    <div className="flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => acceptSuggestion(exp.id, bullet)}
-                        className="p-1 text-green-600 hover:bg-green-50 rounded transition-all"
-                      >
-                        <Check className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => rejectSuggestion(exp.id, bullet)}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-all"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Selected Bullets */}
-          {exp.aiOptimizedBullets && exp.aiOptimizedBullets.length > 0 && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h4 className="text-sm font-semibold text-green-900 mb-3 flex items-center">
-                <Check className="h-4 w-4 mr-2" />
-                Selected Bullet Points:
-              </h4>
-              <ul className="space-y-2">
-                {exp.aiOptimizedBullets.map((bullet, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start justify-between text-sm text-gray-700 bg-white p-2 rounded hover:bg-gray-50 transition-all"
-                  >
-                    <span>• {bullet}</span>
-                    <button
-                      onClick={() => removeBullet(exp.id, bullet)}
-                      className="text-red-500 hover:text-red-700 ml-2"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       ))}
 
