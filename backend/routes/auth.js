@@ -19,7 +19,7 @@ function generateToken(user) {
 // POST /api/auth/signup
 router.post('/signup', async (req, res) => {
   try {
-    const { email, fullName, password } = req.body;
+    const { email, password } = req.body; // Removed fullName
 
     if (!email || !password) {
       return res.status(400).json({
@@ -48,17 +48,20 @@ router.post('/signup', async (req, res) => {
     const salt = await bcrypt.genSalt(12);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create user
+    // Create user and a default empty resume document
     const user = await prisma.user.create({
       data: {
         email: email.toLowerCase().trim(),
-        fullName: fullName || null,
         password: hashedPassword,
+        resumes: {
+          create: {
+            data: {} // Blank JSON object for the new Document Object Pattern
+          }
+        }
       },
       select: {
         id: true,
         email: true,
-        fullName: true,
         createdAt: true,
       }
     });
@@ -117,7 +120,6 @@ router.post('/login', async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        fullName: user.fullName,
         createdAt: user.createdAt,
       },
     });
@@ -135,7 +137,6 @@ router.get('/me', verifyToken, async (req, res) => {
       select: {
         id: true,
         email: true,
-        fullName: true,
         createdAt: true,
       }
     });
