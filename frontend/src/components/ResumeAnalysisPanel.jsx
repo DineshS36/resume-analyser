@@ -44,10 +44,10 @@ const ResumeAnalysisPanel = ({ analysis }) => {
       <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center">
         <Icon className="h-4 w-4 text-gray-600" />
       </div>
-      <div className="flex-1">
+      <div className="flex-1 min-w-0">
         <div className="flex justify-between items-center mb-1">
-          <span className="text-sm font-medium text-gray-700">{label}</span>
-          <span className={`text-sm font-bold ${score >= 80 ? 'text-green-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+          <span className="text-sm font-medium text-gray-700 truncate">{label}</span>
+          <span className={`text-sm font-bold ${score >= 80 ? 'text-green-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600'} flex-shrink-0 ml-2`}>
             {score}/100
           </span>
         </div>
@@ -69,8 +69,8 @@ const ResumeAnalysisPanel = ({ analysis }) => {
         onClick={onToggle}
         className="w-full flex items-center justify-between p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
       >
-        <div className="flex items-center space-x-3">
-          <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+        <div className="flex items-center space-x-3 min-w-0 flex-1 mr-2 text-left">
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
             type === 'strength' ? 'bg-green-100' : 
             type === 'improvement' ? 'bg-yellow-100' : 
             type === 'ats' ? 'bg-blue-100' : 'bg-purple-100'
@@ -81,13 +81,13 @@ const ResumeAnalysisPanel = ({ analysis }) => {
               type === 'ats' ? 'text-blue-600' : 'text-purple-600'
             }`} />
           </div>
-          <span className="font-semibold text-gray-900">{title}</span>
-          <span className="text-sm text-gray-500">({items?.length || 0})</span>
+          <span className="font-semibold text-gray-900 text-sm truncate">{title}</span>
+          <span className="text-sm text-gray-500 flex-shrink-0">({items?.length || 0})</span>
         </div>
         {isExpanded ? (
-          <ChevronUp className="h-5 w-5 text-gray-400" />
+          <ChevronUp className="h-5 w-5 text-gray-400 flex-shrink-0" />
         ) : (
-          <ChevronDown className="h-5 w-5 text-gray-400" />
+          <ChevronDown className="h-5 w-5 text-gray-400 flex-shrink-0" />
         )}
       </button>
       
@@ -118,12 +118,12 @@ const ResumeAnalysisPanel = ({ analysis }) => {
                       ) : (
                         <Lightbulb className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
                       )}
-                      <span className="text-sm text-gray-700">{item}</span>
+                      <span className="text-sm text-gray-700 flex-1 leading-relaxed text-left">{item}</span>
                     </motion.li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-sm text-gray-500 italic">No items available</p>
+                <p className="text-sm text-gray-500 italic text-left">No items available</p>
               )}
             </div>
           </motion.div>

@@ -271,12 +271,6 @@ export default function BuildResume() {
               onAnalyze={handleAnalyze}
             />
             <ResumeAnalysisPanel analysis={analysis} />
-            <ResumePreview 
-              data={resumeData} 
-              template={resumeData.template}
-              onTemplateChange={(template) => updateResumeData('template', template)}
-              onDownloadPDF={handleDownloadPDF}
-            />
           </div>
         );
       default:
@@ -391,11 +385,9 @@ export default function BuildResume() {
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full max-w-screen-2xl mx-auto mt-8">
           {/* Form Section */}
-          <div className="lg:col-span-4 h-[calc(100vh-100px)] overflow-y-auto pr-2 pb-20 custom-scrollbar">
-            <div 
-              className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 border border-gray-100 hover:shadow-2xl transition-shadow duration-300"
-            >
-            <div className="flex items-center justify-between mb-6">
+          <div className="lg:col-span-4 h-[calc(100vh-100px)] bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-100 hover:shadow-2xl transition-shadow duration-300 flex flex-col overflow-hidden">
+            {/* Header (Fixed at top) */}
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 flex-shrink-0">
               <h2 className="text-2xl font-bold text-gray-900">
                 {steps[currentStep].label}
               </h2>
@@ -404,12 +396,15 @@ export default function BuildResume() {
               </span>
             </div>
             
-            <div className="transition-all duration-300">
-              {renderStepContent()}
+            {/* Content (Scrollable in the middle) */}
+            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+              <div className="transition-all duration-300">
+                {renderStepContent()}
+              </div>
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8 pt-6 border-t border-gray-100">
+            {/* Navigation Buttons (Fixed at bottom) */}
+            <div className="flex justify-between p-6 pt-4 border-t border-gray-100 bg-white/90 backdrop-blur-sm flex-shrink-0">
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
@@ -450,7 +445,6 @@ export default function BuildResume() {
                   <ChevronRight className="h-5 w-5 ml-1" />
                 </button>
               )}
-            </div>
             </div>
           </div>
 

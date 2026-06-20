@@ -38,15 +38,15 @@ const ResumeScoreCard = ({ score, isLoading, onAnalyze }) => {
       animate={{ opacity: 1, y: 0 }}
       className="h-auto shrink-0 w-full flex flex-col bg-white rounded-xl shadow-sm p-6 border border-gray-100"
     >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-          <Sparkles className="h-5 w-5 mr-2 text-purple-500" />
-          Resume Score
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center min-w-0">
+          <Sparkles className="h-5 w-5 mr-2 text-purple-500 flex-shrink-0" />
+          <span className="truncate">Resume Score</span>
         </h3>
         <button
           onClick={onAnalyze}
           disabled={isLoading}
-          className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex items-center px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium rounded-lg shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
         >
           {isLoading ? (
             <>
@@ -66,7 +66,7 @@ const ResumeScoreCard = ({ score, isLoading, onAnalyze }) => {
       </div>
 
       {score > 0 ? (
-        <div className="flex items-center space-x-6">
+        <div className="flex flex-col items-center text-center space-y-4 w-full min-w-0">
           <div className="relative w-32 h-32 flex-shrink-0">
             <svg className="w-32 h-32 transform -rotate-90">
               <circle
@@ -103,14 +103,14 @@ const ResumeScoreCard = ({ score, isLoading, onAnalyze }) => {
             </div>
           </div>
 
-          <div className="flex-1">
-            <div className="flex items-center space-x-2 mb-2">
+          <div className="flex-1 w-full">
+            <div className="flex items-center justify-center space-x-2 mb-2">
               {getScoreIcon(score)}
               <span className={`text-lg font-semibold ${getScoreColor(score)}`}>
                 {getScoreLabel(score)}
               </span>
             </div>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 leading-relaxed">
               {score >= 80
                 ? "Your resume is well-optimized and ATS-friendly. Great job!"
                 : score >= 60
@@ -124,19 +124,19 @@ const ResumeScoreCard = ({ score, isLoading, onAnalyze }) => {
           <div className="bg-gray-100 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
             <Sparkles className="h-8 w-8 text-gray-400" />
           </div>
-          <p className="text-gray-600 mb-4">
+          <p className="text-gray-600 mb-6 max-w-sm mx-auto leading-relaxed">
             Get AI-powered feedback on your resume's ATS compatibility and content quality.
           </p>
-          <div className="flex justify-center space-x-4 text-sm text-gray-500">
-            <span className="flex items-center">
+          <div className="flex flex-wrap justify-center gap-3 text-sm text-gray-500">
+            <span className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2" />
               ATS Score
             </span>
-            <span className="flex items-center">
+            <span className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
               <div className="w-2 h-2 bg-blue-500 rounded-full mr-2" />
               Content Quality
             </span>
-            <span className="flex items-center">
+            <span className="flex items-center bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
               <div className="w-2 h-2 bg-purple-500 rounded-full mr-2" />
               Completeness
             </span>

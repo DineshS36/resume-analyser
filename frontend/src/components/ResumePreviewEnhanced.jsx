@@ -37,7 +37,7 @@ const fontOptions = [
   { id: 'playfair', name: 'Playfair (Elegant)', family: 'Playfair Display, serif' },
 ];
 
-export default function ResumePreviewEnhanced({ data, template, onTemplateChange, onDownloadPDF }) {
+export default function ResumePreviewEnhanced({ data, template, onTemplateChange, onDownloadPDF, compact = false }) {
   const [zoom, setZoom] = useState(100);
   const [deviceView, setDeviceView] = useState('desktop'); // desktop, tablet, mobile
   const [colorTheme, setColorTheme] = useState('blue');
@@ -127,6 +127,229 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
     // Reordering logic would go here
     console.log(`Moving ${sourceSection} to ${targetSection}`);
   };
+
+  if (compact) {
+    return (
+      <div className="h-auto shrink-0 w-full flex flex-col bg-white rounded-xl shadow-sm p-6 border border-gray-100 space-y-4">
+        <h3 className="text-lg font-semibold text-gray-900 flex items-center mb-2">
+          <Eye className="h-5 w-5 mr-2 text-blue-600" />
+          Customize & Export
+        </h3>
+        
+        <div className="grid grid-cols-2 gap-3">
+          {/* ATS Match Button */}
+          <button
+            onClick={() => setIsAtsModalOpen(true)}
+            className="flex items-center justify-center space-x-2 px-3 py-3 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition-colors font-medium text-sm"
+          >
+            <span>🔍 ATS Match</span>
+          </button>
+
+          {/* Theme Button */}
+          <button
+            onClick={() => setIsThemeModalOpen(true)}
+            className="flex items-center justify-center space-x-2 px-3 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm"
+          >
+            <Palette className="h-4 w-4 text-gray-600 flex-shrink-0" />
+            <span>Theme</span>
+          </button>
+
+          {/* Font Button */}
+          <button
+            onClick={() => setShowFontPicker(!showFontPicker)}
+            className="flex items-center justify-center space-x-2 px-3 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors font-medium text-sm"
+          >
+            <Type className="h-4 w-4 text-gray-600 flex-shrink-0" />
+            <span>Font</span>
+          </button>
+
+          {/* Download Button */}
+          <button
+            onClick={handleDownloadPdf}
+            className="flex items-center justify-center space-x-2 px-3 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium text-sm"
+          >
+            <Download className="h-4 w-4 flex-shrink-0" />
+            <span>Download</span>
+          </button>
+        </div>
+
+        {/* Font Picker Dropdown */}
+        <AnimatePresence>
+          {showFontPicker && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mt-2 w-full bg-white rounded-xl shadow-lg border border-gray-200 p-2 z-20"
+            >
+              {fontOptions.map((font) => (
+                <button
+                  key={font.id}
+                  onClick={() => {
+                    setFontFamily(font.id);
+                    setShowFontPicker(false);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                    fontFamily === font.id ? 'bg-blue-50 text-blue-700' : 'hover:bg-gray-50'
+                  }`}
+                  style={{ fontFamily: font.family }}
+                >
+                  {font.name}
+                </button>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Hidden Document Wrapper (Required for print reference to generate the PDF context) */}
+        <div className="hidden">
+          <div ref={documentRef}>
+            <div style={{ 
+              fontFamily: fontOptions.find(f => f.id === fontFamily)?.family,
+              '--primary-color': colorThemes.find(t => t.id === colorTheme)?.primary,
+              '--secondary-color': colorThemes.find(t => t.id === colorTheme)?.secondary,
+              width: '794px',
+              minHeight: '1123px'
+            }}>
+              <ResumePreview 
+                data={data} 
+                template={template}
+                colorTheme={colorTheme}
+                fontFamily={fontFamily}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Modals */}
+        {isThemeModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-5xl max-h-[85vh] overflow-y-auto p-6 relative">
+              <button 
+                onClick={() => setIsThemeModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-black p-2 bg-gray-100 rounded-full"
+              >
+                ✕
+              </button>
+              <TemplateSelector 
+                selected={template} 
+                onSelect={(newTemplate) => {
+                  onTemplateChange(newTemplate);
+                  setIsThemeModalOpen(false);
+                }} 
+              />
+            </div>
+          </div>
+        )}
+
+        {isAtsModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-y-auto p-6 relative">
+              <button 
+                onClick={() => setIsAtsModalOpen(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-black p-2 bg-gray-100 rounded-full"
+              >
+                ✕
+              </button>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">ATS Match Analyzer</h2>
+              {!atsResults ? (
+                <div className="space-y-4">
+                  <p className="text-gray-600">Paste the Job Description below to see how well your resume matches.</p>
+                  <textarea
+                    value={jobDescription}
+                    onChange={(e) => setJobDescription(e.target.value)}
+                    placeholder="Paste Job Description here..."
+                    className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 resize-none"
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      onClick={handleAnalyzeAts}
+                      disabled={isAnalyzing}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-blue-400 font-medium flex items-center space-x-2"
+                    >
+                      {isAnalyzing ? (
+                        <>
+                          <span className="animate-spin text-xl">⏳</span>
+                          <span>Analyzing...</span>
+                        </>
+                      ) : (
+                        <span>Analyze Resume</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-8">
+                  <div className="flex flex-col items-center p-6 bg-gray-50 rounded-xl border border-gray-100">
+                    <span className="text-gray-500 font-medium mb-2">Match Score</span>
+                    <div className={`text-6xl font-bold ${
+                      atsResults.matchScore < 50 ? 'text-red-500' :
+                      atsResults.matchScore < 75 ? 'text-yellow-500' : 'text-green-500'
+                    }`}>
+                      {atsResults.matchScore}%
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-green-50 p-6 rounded-xl border border-green-100">
+                      <h3 className="font-semibold text-green-800 mb-4 flex items-center">
+                        <span className="mr-2">✅</span> Matched Skills
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {atsResults.matchedKeywords?.map((kw, i) => (
+                          <span key={i} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                            {kw}
+                          </span>
+                        ))}
+                        {(!atsResults.matchedKeywords || atsResults.matchedKeywords.length === 0) && (
+                          <span className="text-gray-500 italic text-sm">No exact matches found.</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="bg-red-50 p-6 rounded-xl border border-red-100">
+                      <h3 className="font-semibold text-red-800 mb-4 flex items-center">
+                        <span className="mr-2">❌</span> Missing Skills
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {atsResults.missingKeywords?.map((kw, i) => (
+                          <span key={i} className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+                            {kw}
+                          </span>
+                        ))}
+                        {(!atsResults.missingKeywords || atsResults.missingKeywords.length === 0) && (
+                          <span className="text-gray-500 italic text-sm">No missing keywords!</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-blue-50 p-6 rounded-xl border border-blue-100">
+                    <h3 className="font-semibold text-blue-800 mb-4 flex items-center">
+                      <span className="mr-2">💡</span> Recommendations
+                    </h3>
+                    <ul className="space-y-3">
+                      {atsResults.recommendations?.map((rec, i) => (
+                        <li key={i} className="flex items-start text-blue-900">
+                          <span className="mr-3 mt-1">•</span>
+                          <span>{rec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex justify-end pt-4">
+                    <button
+                      onClick={() => setAtsResults(null)}
+                      className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 font-medium"
+                    >
+                      Check Another Job
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
