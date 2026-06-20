@@ -32,6 +32,8 @@ const ATS_MATCH_SYSTEM_PROMPT = `Compare the provided resume data against the jo
 
 const ENHANCE_BULLET_SYSTEM_PROMPT = `Act as an elite executive resume writer. Rewrite the provided bullet point to be highly professional, impactful, and metric-driven using the STAR method (Situation, Task, Action, Result). It MUST remain a single sentence. Do not use first-person pronouns (I, me). If 'keywords' are provided, naturally integrate as many of them as logically possible without sounding robotic.`;
 
+const INTERVIEW_PREP_SYSTEM_PROMPT = `Act as an elite technical recruiter. Analyze the provided resume data and the target job description (if provided). Generate 5 highly specific, challenging interview questions the candidate is likely to face. For each question, provide a brief, strategic 'Tip' on how to answer it effectively using the STAR method.`;
+
 // ---------------------------------------------------------------------------
 // 1. Generate Bullet Points  (Structured Output — JSON array of 3 strings)
 // ---------------------------------------------------------------------------
@@ -617,6 +619,51 @@ async function enhanceBullet(originalText, keywords = []) {
 }
 
 // ---------------------------------------------------------------------------
+// 8. Generate Interview Questions
+// ---------------------------------------------------------------------------
+async function generateInterviewQuestions(resumeData, jobDescription) {
+  if (!ai) {
+    return [
+      { question: "Can you tell me about yourself and your background?", tip: "Use the Present-Past-Future formula to structure your answer." },
+      { question: "Describe a time you faced a difficult challenge at work.", tip: "Use the STAR method: Situation, Task, Action, Result." },
+      { question: "What are your biggest strengths and weaknesses?", tip: "Choose a real weakness and explain what you are doing to overcome it." },
+      { question: "Why do you want to work for our company?", tip: "Show you have done your research about the company's recent projects or values." },
+      { question: "Where do you see yourself in 5 years?", tip: "Align your goals with the role you are applying for." }
+    ];
+  }
+
+  try {
+    const prompt = `${INTERVIEW_PREP_SYSTEM_PROMPT}\n\nResume Data: ${JSON.stringify(resumeData)}\nTarget Job Description: ${jobDescription || 'Not provided'}\n\nGenerate 5 challenging interview questions:`;
+
+    const response = await ai.models.generateContent({
+      model: MODEL,
+      contents: prompt,
+      config: {
+        temperature: 0.7,
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.ARRAY,
+          description: "List of 5 highly specific interview questions and tips",
+          items: {
+            type: Type.OBJECT,
+            properties: {
+              question: { type: Type.STRING, description: "The specific interview question" },
+              tip: { type: Type.STRING, description: "A strategic tip on how to answer using the STAR method" }
+            },
+            required: ["question", "tip"]
+          }
+        }
+      }
+    });
+
+    return JSON.parse(response.text);
+  } catch (error) {
+    console.error('Error generating interview questions:', error);
+    throw new Error('Failed to generate interview questions. ' + error.message);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Exports
 // ---------------------------------------------------------------------------
 module.exports = {
@@ -626,5 +673,6 @@ module.exports = {
   generateCoverLetter,
   analyzeATS,
   parseResumePDF,
-  enhanceBullet
+  enhanceBullet,
+  generateInterviewQuestions
 };

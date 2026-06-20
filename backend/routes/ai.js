@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const verifyToken = require('../middleware/auth');
-const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, analyzeATS, parseResumePDF, enhanceBullet } = require('../services/geminiService');
+const { generateBulletPoints, generateProfessionalSummary, analyzeResume, generateCoverLetter, analyzeATS, parseResumePDF, enhanceBullet, generateInterviewQuestions } = require('../services/geminiService');
 const rateLimit = require('express-rate-limit');
 
 // Implement strict AI rate limiting
@@ -172,6 +172,33 @@ router.post('/analyze-ats', verifyToken, aiLimiter, async (req, res) => {
         console.error('Analyze ATS error:', error);
         res.status(500).json({ 
             error: 'Failed to analyze ATS match',
+            message: error.message 
+        });
+    }
+});
+
+// POST /api/interview-prep
+// Accepts resume data and optional job description, returns 5 specific interview questions and tips
+router.post('/interview-prep', verifyToken, aiLimiter, async (req, res) => {
+    try {
+        const { resumeData, jobDescription } = req.body;
+        
+        if (!resumeData) {
+            return res.status(400).json({ 
+                error: 'Missing required field: resumeData' 
+            });
+        }
+        
+        const questions = await generateInterviewQuestions(resumeData, jobDescription);
+        
+        res.json({
+            success: true,
+            questions: questions
+        });
+    } catch (error) {
+        console.error('Interview prep error:', error);
+        res.status(500).json({ 
+            error: 'Failed to generate interview questions',
             message: error.message 
         });
     }

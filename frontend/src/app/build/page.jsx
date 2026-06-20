@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, ChevronRight, ChevronLeft, User, Briefcase, GraduationCap, Wrench, Eye, Download, RotateCcw, LogOut, UserCircle, FolderDot } from 'lucide-react';
+import { Sparkles, ChevronRight, ChevronLeft, User, Briefcase, GraduationCap, Wrench, Eye, Download, RotateCcw, LogOut, UserCircle, FolderDot, MessageSquare } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import PersonalInfoForm from '@/components/PersonalInfoFormEnhanced';
 import ExperienceForm from '@/components/ExperienceForm';
@@ -14,6 +14,7 @@ import TemplateSelector from '@/components/TemplateSelector';
 import PDFGenerator from '@/components/PDFGenerator';
 import ResumeScoreCard from '@/components/ResumeScoreCard';
 import ResumeAnalysisPanel from '@/components/ResumeAnalysisPanel';
+import InterviewPrepModal from '@/components/InterviewPrepModal';
 import { useAutoSave } from '@/hooks/useAutoSave';
 import { analyzeResume } from '@/lib/api';
 import toast from 'react-hot-toast';
@@ -33,6 +34,7 @@ export default function BuildResume() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showInterviewModal, setShowInterviewModal] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [resumeData, setResumeData] = useState({
     personalInfo: {
@@ -408,41 +410,31 @@ export default function BuildResume() {
               <button
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`flex items-center px-6 py-3 rounded-xl font-medium transition-all ${
+                className={`flex items-center px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   currentStep === 0
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300 shadow-sm hover:scale-102'
                 }`}
               >
-                <ChevronLeft className="h-5 w-5 mr-1" />
+                <ChevronLeft className="h-4 w-4 mr-1.5" />
                 Previous
               </button>
 
               {currentStep === steps.length - 1 ? (
                 <button
-                  onClick={handleDownloadPDF}
-                  disabled={isGeneratingPDF}
-                  className="flex items-center px-8 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl font-medium shadow-lg shadow-green-200 hover:shadow-xl hover:scale-105 transition-all disabled:opacity-50"
+                  onClick={() => setShowInterviewModal(true)}
+                  className="flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-purple-200 hover:shadow-xl hover:scale-105 transition-all"
                 >
-                  {isGeneratingPDF ? (
-                    <>
-                      <div className="h-5 w-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Download className="h-5 w-5 mr-2" />
-                      Download PDF
-                    </>
-                  )}
+                  <MessageSquare className="h-4 w-4 mr-1.5" />
+                  Interview Prep
                 </button>
               ) : (
                 <button
                   onClick={nextStep}
-                  className="flex items-center px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-medium shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-105 transition-all"
+                  className="flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-200 hover:shadow-xl hover:scale-105 transition-all"
                 >
                   Next
-                  <ChevronRight className="h-5 w-5 ml-1" />
+                  <ChevronRight className="h-4 w-4 ml-1.5" />
                 </button>
               )}
             </div>
@@ -476,6 +468,11 @@ export default function BuildResume() {
           </div>
         </div>
       </div>
+      <InterviewPrepModal 
+        isOpen={showInterviewModal} 
+        onClose={() => setShowInterviewModal(false)} 
+        resumeData={resumeData} 
+      />
     </div>
   );
 }
