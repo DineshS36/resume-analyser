@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
+import { saveResumeToCloud } from '@/lib/api';
 
 const STORAGE_KEY = 'resume_builder_draft';
 
 export function useAutoSave(resumeData, setResumeData) {
   const saveTimeoutRef = useRef(null);
   const isRestoredRef = useRef(false);
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
 
   // Load saved data on mount
   useEffect(() => {
@@ -35,16 +37,29 @@ export function useAutoSave(resumeData, setResumeData) {
       clearTimeout(saveTimeoutRef.current);
     }
 
-    saveTimeoutRef.current = setTimeout(() => {
+    saveTimeoutRef.current = setTimeout(async () => {
+      // 1. Fast local cache
       localStorage.setItem(STORAGE_KEY, JSON.stringify(resumeData));
-      toast.success('Progress saved automatically', {
-        icon: '💾',
-        duration: 2000,
-        style: {
-          fontSize: '14px',
-        },
-      });
-    }, 2000); // Save 2 seconds after last change
+      
+      // 2. Background cloud sync
+      try {
+        setIsSavingCloud(true);
+        await saveResumeToCloud(resumeData);
+        toast.success('Saved to Cloud ☁️', {
+          icon: '☁️',
+          duration: 2000,
+          style: { fontSize: '14px' },
+          id: 'cloud-save-toast'
+        });
+      } catch (error) {
+        console.error('Failed to sync with cloud:', error);
+        toast.error('Local save only (cloud sync failed)', {
+          id: 'cloud-save-toast'
+        });
+      } finally {
+        setIsSavingCloud(false);
+      }
+    }, 1500); // Save 1.5 seconds after last change
 
     return () => {
       if (saveTimeoutRef.current) {
@@ -58,5 +73,5 @@ export function useAutoSave(resumeData, setResumeData) {
     toast.success('Draft cleared', { icon: '🗑️' });
   }, []);
 
-  return { clearSavedData };
+  return { clearSavedData, isSavingCloud };
 }

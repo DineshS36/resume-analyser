@@ -8,6 +8,46 @@ const prisma = new PrismaClient();
 // Apply the auth middleware to ALL resume routes
 router.use(verifyToken);
 
+// PUT /api/resumes/save - Auto-save the complete resumeData object
+router.put('/save', async (req, res) => {
+    try {
+        const resumeData = req.body;
+        
+        // Find existing resume for this user or create a new one
+        const existingResume = await prisma.resume.findFirst({
+            where: { userId: req.user.id },
+            orderBy: { updatedAt: 'desc' }
+        });
+
+        if (existingResume) {
+            await prisma.resume.update({
+                where: { id: existingResume.id },
+                data: {
+                    title: resumeData.targetJobTitle || 'My Resume',
+                    summary: resumeData.summary || null,
+                    templateId: resumeData.template || 'classic',
+                    data: resumeData
+                }
+            });
+        } else {
+            await prisma.resume.create({
+                data: {
+                    userId: req.user.id,
+                    title: resumeData.targetJobTitle || 'My Resume',
+                    summary: resumeData.summary || null,
+                    templateId: resumeData.template || 'classic',
+                    data: resumeData
+                }
+            });
+        }
+
+        res.status(200).json({ success: true, message: 'Resume saved to cloud' });
+    } catch (error) {
+        console.error('Save resume error:', error);
+        res.status(500).json({ error: 'Failed to auto-save resume' });
+    }
+});
+
 // GET /api/resumes - Get all resumes for the authenticated user
 router.get('/', async (req, res) => {
     try {

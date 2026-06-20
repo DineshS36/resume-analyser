@@ -23,6 +23,7 @@ model Resume {
   title       String
   summary     String?
   templateId  String       @default("classic")
+  data        Json?
   updatedAt   DateTime     @updatedAt
   experiences Experience[]
   educations  Education[]

@@ -145,6 +145,16 @@ export const parseResumePDF = async (file) => {
 
 // Resume API endpoints
 
+export const saveResumeToCloud = async (resumeData) => {
+  try {
+    const response = await api.put('/api/resumes/save', resumeData);
+    return response.data;
+  } catch (error) {
+    console.error('Error auto-saving resume:', error);
+    throw error;
+  }
+};
+
 export const createResume = async (title, templateId = 'classic') => {
   try {
     const response = await api.post('/api/resumes', {
