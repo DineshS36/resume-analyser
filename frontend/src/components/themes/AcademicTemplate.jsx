@@ -77,6 +77,48 @@ const AcademicTemplate = ({ data }) => {
         </div>
       )}
 
+      {/* Projects */}
+      {projects.length > 0 && (
+        <div className="mb-6">
+          <h2 className="text-sm font-serif font-bold text-amber-900 uppercase tracking-wider mb-3 border-b border-amber-200 pb-1">
+            Projects
+          </h2>
+          <div className="space-y-4">
+            {projects.map((proj) => (
+              <div key={proj.id} className="break-inside-avoid mb-4">
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-bold text-gray-900 font-serif">{proj.projectName}</h3>
+                  {proj.link && (
+                    <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-amber-700 hover:underline italic">
+                      View Project
+                    </a>
+                  )}
+                </div>
+                {proj.techStack && <p className="text-sm text-gray-600 italic mb-2">{proj.techStack}</p>}
+                {proj.description ? (
+                  <div className="text-sm text-gray-700">
+                    {Array.isArray(proj.description) ? (
+                      <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                        {proj.description.map((bullet, i) => {
+                          const cleanBullet = bullet.replace(/^[-•*]s*/, '').trim();
+                          return (
+                            <li key={i} className="leading-relaxed">
+                              {cleanBullet}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    ) : (
+                      <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Education - Academic Focus */}
       {education.length > 0 && (
         <div className="mb-6">

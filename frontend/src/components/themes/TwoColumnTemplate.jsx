@@ -68,6 +68,44 @@ const TwoColumnTemplate = ({ data }) => {
             </div>
           </div>
         )}
+        {projects.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 mb-3">Projects</h2>
+            <div className="space-y-4">
+              {projects.map((proj) => (
+                <div key={proj.id} className="break-inside-avoid mb-4">
+                  <div className="flex justify-between items-baseline mb-1">
+                    <h3 className="font-bold text-gray-900">{proj.projectName}</h3>
+                    {proj.link && (
+                      <a href={proj.link} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                        View Project
+                      </a>
+                    )}
+                  </div>
+                  {proj.techStack && <p className="text-xs text-gray-500 mb-2 italic">{proj.techStack}</p>}
+                  {proj.description ? (
+                    <div className="text-sm text-gray-700">
+                      {Array.isArray(proj.description) ? (
+                        <ul className="list-disc ml-5 space-y-1.5 marker:text-gray-600 text-sm mt-2">
+                          {proj.description.map((bullet, i) => {
+                            const cleanBullet = bullet.replace(/^[-•*]s*/, '').trim();
+                            return (
+                              <li key={i} className="leading-relaxed">
+                                {cleanBullet}
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      ) : (
+                        <p className="text-sm mt-2 leading-relaxed">{proj.description}</p>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
