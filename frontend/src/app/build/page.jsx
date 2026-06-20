@@ -344,12 +344,10 @@ export default function BuildResume() {
                   <button
                     key={step.id}
                     onClick={() => goToStep(index)}
-                    className={`flex flex-col items-center space-y-2 relative z-10 ${
-                      index === steps.length - 1 ? '' : 'flex-1'
-                    }`}
+                    className="flex flex-col items-center space-y-2 relative z-10 flex-1"
                   >
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 ${
+                      className={`bg-white w-12 h-12 rounded-full flex items-center justify-center shadow-md transition-all duration-300 hover:scale-110 ${
                         isActive 
                           ? 'bg-gradient-to-r from-blue-600 to-indigo-600 ring-4 ring-blue-200 scale-110' 
                           : isCompleted 
@@ -375,7 +373,7 @@ export default function BuildResume() {
               })}
             </div>
             {/* Progress Bar */}
-            <div className="absolute top-6 left-0 right-0 h-1.5 bg-gray-200 rounded-full -z-0">
+            <div className="absolute top-6 -translate-y-1/2 left-[8.33%] right-[8.33%] h-1.5 bg-gray-200 rounded-full z-0">
               <div
                 className="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
