@@ -11,8 +11,11 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [isParsing, setIsParsing] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
   const fileInputRef = useRef(null);
   const { errors, validateField } = useValidation();
+
+  const hasExistingData = data?.fullName || data?.email;
 
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
@@ -133,64 +136,97 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
 
   return (
     <div className="h-auto shrink-0 w-full flex flex-col space-y-6">
-      {/* PDF Upload Dropzone */}
-      <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => !isParsing && fileInputRef.current?.click()}
-        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-300 ${
-          isParsing
-            ? 'border-amber-400 bg-amber-50 cursor-wait'
-            : isDragOver
-            ? 'border-blue-500 bg-blue-50 scale-[1.02] shadow-lg shadow-blue-100'
-            : 'border-gray-300 bg-gradient-to-br from-gray-50 to-blue-50 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md'
-        }`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".pdf,application/pdf"
-          onChange={(e) => handleFileSelect(e.target.files[0])}
-          className="hidden"
-          disabled={isParsing}
-        />
-        
-        {isParsing ? (
-          <div className="flex flex-col items-center space-y-3">
-            <div className="relative">
-              <div className="h-14 w-14 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200 animate-pulse">
-                <Loader2 className="h-7 w-7 text-white animate-spin" />
+      {/* Conditionally Rendered Upload Area */}
+      {!hasExistingData || showUpload ? (
+        <div className="animate-in fade-in slide-in-from-top-4 duration-300">
+          {!hasExistingData && (
+            <div className="mb-4 p-4 bg-purple-50 border border-purple-100 rounded-lg text-sm text-purple-800">
+              👋 <strong>Welcome!</strong> Save time by uploading your existing resume. Our AI will automatically extract your details and fill out the fields below.
+            </div>
+          )}
+          <div
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onClick={() => !isParsing && fileInputRef.current?.click()}
+            className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center transition-all duration-300 ${
+              isParsing
+                ? 'border-amber-400 bg-amber-50 cursor-wait'
+                : isDragOver
+                ? 'border-blue-500 bg-blue-50 scale-[1.02] shadow-lg shadow-blue-100'
+                : 'border-gray-300 bg-gradient-to-br from-gray-50 to-blue-50 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md'
+            }`}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              onChange={(e) => handleFileSelect(e.target.files[0])}
+              className="hidden"
+              disabled={isParsing}
+            />
+            
+            {isParsing ? (
+              <div className="flex flex-col items-center space-y-3">
+                <div className="relative">
+                  <div className="h-14 w-14 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200 animate-pulse">
+                    <Loader2 className="h-7 w-7 text-white animate-spin" />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-amber-800">Parsing resume with AI...</p>
+                  <p className="text-xs text-amber-600 mt-1">Extracting your information — this may take a moment</p>
+                </div>
               </div>
+            ) : (
+              <div className="flex flex-col items-center space-y-3">
+                <div className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
+                  <Upload className="h-7 w-7 text-white" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    Upload Existing Resume <span className="text-blue-600">(PDF)</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Drag & drop your PDF here, or <span className="text-blue-600 font-medium underline">click to browse</span>
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2 text-xs text-gray-400">
+                  <FileText className="h-3.5 w-3.5" />
+                  <span>PDF only • Max 10 MB</span>
+                  <span>•</span>
+                  <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+                  <span>AI auto-fills all fields</span>
+                </div>
+              </div>
+            )}
+          </div>
+          {hasExistingData && showUpload && (
+            <button 
+              onClick={() => setShowUpload(false)}
+              className="mt-3 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors w-full text-center"
+            >
+              Cancel upload
+            </button>
+          )}
+        </div>
+      ) : (
+        <button
+          onClick={() => setShowUpload(true)}
+          className="flex items-center justify-between w-full p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:bg-blue-50 transition-all group"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+              <Upload className="h-5 w-5" />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-amber-800">Parsing resume with AI...</p>
-              <p className="text-xs text-amber-600 mt-1">Extracting your information — this may take a moment</p>
+            <div className="text-left">
+              <p className="text-sm font-semibold text-gray-800">Want to start over?</p>
+              <p className="text-xs text-gray-500">Upload a new PDF to auto-fill</p>
             </div>
           </div>
-        ) : (
-          <div className="flex flex-col items-center space-y-3">
-            <div className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">
-              <Upload className="h-7 w-7 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-gray-800">
-                Upload Existing Resume <span className="text-blue-600">(PDF)</span>
-              </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Drag & drop your PDF here, or <span className="text-blue-600 font-medium underline">click to browse</span>
-              </p>
-            </div>
-            <div className="flex items-center space-x-2 text-xs text-gray-400">
-              <FileText className="h-3.5 w-3.5" />
-              <span>PDF only • Max 10 MB</span>
-              <span>•</span>
-              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
-              <span>AI auto-fills all fields</span>
-            </div>
-          </div>
-        )}
-      </div>
+          <span className="text-blue-600 text-sm font-medium group-hover:underline">Upload Resume</span>
+        </button>
+      )}
 
       <div className="relative flex items-center justify-center">
         <div className="flex-grow border-t border-gray-200"></div>
