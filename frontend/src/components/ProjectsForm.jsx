@@ -76,7 +76,7 @@ export default function ProjectsForm({ projects = [], onChange }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="h-auto shrink-0 w-full flex flex-col space-y-4">
       {(projects || []).map((proj, index) => (
         <div
           key={proj.id}

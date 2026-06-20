@@ -36,7 +36,7 @@ const ResumeScoreCard = ({ score, isLoading, onAnalyze }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+      className="h-auto shrink-0 w-full flex flex-col bg-white rounded-xl shadow-sm p-6 border border-gray-100"
     >
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-900 flex items-center">

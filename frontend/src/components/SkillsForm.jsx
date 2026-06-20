@@ -14,7 +14,6 @@ const SUGGESTED_SKILLS = [
 
 export default function SkillsForm({ skills, onChange }) {
   const [newSkill, setNewSkill] = useState('');
-  const [newLevel, setNewLevel] = useState('Intermediate');
 
   const addSkill = () => {
     if (!newSkill.trim()) return;
@@ -27,7 +26,6 @@ export default function SkillsForm({ skills, onChange }) {
     const skill = {
       id: Date.now().toString(),
       name: newSkill.trim(),
-      level: newLevel,
     };
     onChange([...skills, skill]);
     setNewSkill('');
@@ -45,7 +43,6 @@ export default function SkillsForm({ skills, onChange }) {
     const skill = {
       id: Date.now().toString() + Math.random(),
       name: skillName,
-      level: 'Intermediate',
     };
     onChange([...skills, skill]);
   };
@@ -58,32 +55,22 @@ export default function SkillsForm({ skills, onChange }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="h-auto shrink-0 w-full flex flex-col bg-white rounded-xl p-6 shadow-sm space-y-6">
       {/* Add New Skill */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-5 border border-blue-200 shadow-sm">
         <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
           <Sparkles className="h-4 w-4 mr-2 text-blue-600" />
           Add New Skill
         </h3>
-        <div className="flex gap-3">
+        <div className="flex w-full gap-3">
           <input
             type="text"
             value={newSkill || ''}
             onChange={(e) => setNewSkill(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Enter a skill (e.g., React, Project Management)"
-            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
+            className="w-full flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900 placeholder-gray-400"
           />
-          <select
-            value={newLevel || ''}
-            onChange={(e) => setNewLevel(e.target.value)}
-            className="px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all shadow-sm text-gray-900"
-          >
-            <option value="Beginner">Beginner</option>
-            <option value="Intermediate">Intermediate</option>
-            <option value="Advanced">Advanced</option>
-            <option value="Expert">Expert</option>
-          </select>
           <button
             onClick={addSkill}
             disabled={!newSkill.trim()}
@@ -140,9 +127,6 @@ export default function SkillsForm({ skills, onChange }) {
               >
                 <span className="text-sm font-medium text-gray-700 mr-2">
                   {skill.name}
-                </span>
-                <span className="text-xs text-gray-500 mr-2">
-                  ({skill.level})
                 </span>
                 <button
                   onClick={() => deleteSkill(skill.id)}

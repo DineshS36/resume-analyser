@@ -132,7 +132,7 @@ export default function PersonalInfoForm({ data, targetJobTitle, summary, onChan
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="h-auto shrink-0 w-full flex flex-col space-y-6">
       {/* PDF Upload Dropzone */}
       <div
         onDrop={handleDrop}

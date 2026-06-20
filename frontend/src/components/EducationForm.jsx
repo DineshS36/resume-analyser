@@ -32,7 +32,7 @@ export default function EducationForm({ education, onChange }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="h-auto shrink-0 w-full flex flex-col space-y-4">
       {education.length === 0 ? (
         <div className="text-center py-12 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
           <GraduationCap className="h-12 w-12 mx-auto text-gray-400 mb-4" />

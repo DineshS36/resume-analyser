@@ -80,7 +80,7 @@ export default function ExperienceForm({ experiences, onChange, targetJobTitle }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="h-auto shrink-0 w-full flex flex-col space-y-4">
       {experiences.map((exp, index) => (
         <div
           key={exp.id}

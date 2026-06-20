@@ -136,7 +136,7 @@ const ResumeAnalysisPanel = ({ analysis }) => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+      className="h-auto shrink-0 w-full flex flex-col bg-white rounded-xl shadow-sm p-6 border border-gray-100"
     >
       <h3 className="text-lg font-semibold text-gray-900 mb-6 flex items-center">
         <TrendingUp className="h-5 w-5 mr-2 text-blue-500" />
