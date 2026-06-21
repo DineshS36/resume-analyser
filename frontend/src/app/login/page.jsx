@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Sparkles, Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,33 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token: credentialResponse.credential }), 
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem('resume_builder_token', data.token); 
+        localStorage.setItem('resume_builder_user', JSON.stringify(data.user));
+        
+        window.location.href = '/build';
+      } else {
+        console.error("Backend rejected Google token:", data.error);
+        setError("Google Login Failed: " + (data.error || "Unknown error"));
+      }
+    } catch (err) {
+      console.error("Network error during Google Login:", err);
+      setError("Network error. Please try again.");
+    }
+  };
 
   // If already logged in, redirect to build
   if (isAuthenticated) {
@@ -150,6 +178,24 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          <div className="my-6 flex items-center">
+            <div className="flex-grow border-t border-gray-200"></div>
+            <span className="px-3 text-sm text-gray-400 font-medium">Or continue with</span>
+            <div className="flex-grow border-t border-gray-200"></div>
+          </div>
+
+          <div className="flex justify-center">
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => {
+                  setError('Google Popup Closed or Failed');
+                }}
+                useOneTap
+              />
+            </GoogleOAuthProvider>
+          </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">

@@ -4,8 +4,10 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const verifyToken = require('../middleware/auth');
+const { OAuth2Client } = require('google-auth-library');
 
 const prisma = new PrismaClient();
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Helper: generate a signed JWT for a user
 function generateToken(user) {
@@ -149,6 +151,44 @@ router.get('/me', verifyToken, async (req, res) => {
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({ error: 'Failed to fetch user' });
+  }
+});
+
+// POST /api/auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    const ticket = await googleClient.verifyIdToken({
+        idToken: token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+    });
+    const payload = ticket.getPayload();
+    const { email } = payload; // 'name' removed as it is not in the Prisma schema
+
+    let user = await prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+        user = await prisma.user.create({
+            data: {
+                email,
+                password: Math.random().toString(36).slice(-10) + "GoogleAuth!", 
+                resumes: {
+                  create: {
+                    data: {} // Blank JSON object for the new Document Object Pattern
+                  }
+                }
+            }
+        });
+    }
+
+    const customToken = generateToken(user); // Reusing the existing helper function!
+
+    res.status(200).json({ success: true, token: customToken, user });
+
+  } catch (error) {
+    console.error("Google Auth Error:", error);
+    res.status(401).json({ error: "Invalid Google Token" });
   }
 });
 
