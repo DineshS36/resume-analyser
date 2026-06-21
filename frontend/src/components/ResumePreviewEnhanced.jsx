@@ -125,7 +125,6 @@ export default function ResumePreviewEnhanced({ data, template, onTemplateChange
     setIsDragging(false);
     const sourceSection = e.dataTransfer.getData('section');
     // Reordering logic would go here
-    console.log(`Moving ${sourceSection} to ${targetSection}`);
   };
 
   if (compact) {
