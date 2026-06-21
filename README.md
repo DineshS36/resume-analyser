@@ -1,301 +1,171 @@
 # 🤖 AI-Powered Resume Builder
 
-A modern web application that leverages Large Language Models (LLM) to help job seekers create professional, ATS-friendly resumes with AI-enhanced content.
+A modern web application that leverages Large Language Models (LLM) to help job seekers create professional, ATS-friendly resumes with AI-enhanced content, parse existing PDFs, and generate customized interview prep.
 
 ## ✨ Features
 
 ### Core Functionality
-- **🎯 AI Content Enhancement**: Transform basic job descriptions into compelling, metric-driven bullet points
-- **📝 Smart Summary Generator**: Create tailored professional summaries based on experience and target role
-- **👁️ Real-Time Preview**: Live split-screen view showing resume as it's being built
-- **📄 PDF Export**: Download resumes as clean, professionally formatted PDFs
-- **🎨 Multiple Templates**: Choose from Classic, Modern, and Minimal ATS-friendly layouts
+- **📄 Smart PDF Auto-Fill**: Upload an existing PDF resume and let our AI instantly parse and populate your profile fields.
+- **🎯 AI Content Enhancement**: Transform basic job descriptions into compelling, metric-driven bullet points using the STAR method.
+- **📝 Smart Summary Generator**: Create tailored professional summaries based on experience and target role.
+- **📈 ATS Match Analysis**: Compare your resume against a target job description to get an objective ATS match score and keyword gap analysis.
+- **🗣️ Custom Interview Prep**: Generate 5 highly specific, challenging interview questions you are likely to face, complete with strategic STAR-method answering tips.
+- **👁️ Real-Time Preview**: Live split-screen view showing the resume as it's being built.
+- **📥 PDF Export**: Download resumes as clean, professionally formatted PDFs.
 
-### User Experience
-- **Step-by-Step Builder**: Intuitive multi-step form for data entry
-- **AI Suggestions**: Accept, reject, or manually edit AI-generated content
-- **Responsive Design**: Works seamlessly on desktop and mobile devices
-- **Progress Tracking**: Visual progress indicator through the resume building process
+### User Experience & Security
+- **Secure Authentication**: Traditional Email/Password (bcrypt + JWT) and seamless **Google OAuth** login integration.
+- **Cloud Auto-Save**: Resumes are automatically saved and synced to your account database.
+- **Rate Limiting**: Secure AI endpoints protected against abuse via IP rate limiting.
+- **Responsive Design**: Works seamlessly on desktop and mobile devices.
 
-## 🏗️ Architecture
+---
+
+## 🏗️ Architecture & Logic
 
 ### Tech Stack
 
 **Frontend:**
-- Next.js 14 (React Framework)
-- Tailwind CSS (Styling)
-- html2pdf.js (PDF Generation)
-- Axios (API Client)
+- **Next.js 14** (React Framework, App Router)
+- **Tailwind CSS** (Styling & Animations)
+- **@react-oauth/google** (Google Sign-In)
+- **html2pdf.js** (Client-side PDF Generation)
 
 **Backend:**
-- Node.js + Express
-- Google Gemini AI API
-- Prisma ORM
-- PostgreSQL Database
+- **Node.js + Express.js**
+- **Prisma ORM** (Database mapping)
+- **PostgreSQL Database** (Hosted on Neon)
+- **Multer** (In-memory file processing for PDF uploads)
 
-**AI Integration:**
-- Gemini Pro model for content generation
-- Custom system prompts for resume writing
-- JSON-structured responses for bullet points
+**AI Integration (@google/genai):**
+- **Gemini 3.1 Flash-Lite** model for content generation and PDF parsing.
+- Strict JSON-structured schemas to guarantee valid frontend parsing.
+- Robust fallback logic and robust system prompting.
 
-## 🚀 Getting Started
+---
+
+## 🚀 Getting Started & Running Locally
 
 ### Prerequisites
-- Node.js 18+ 
-- PostgreSQL database
+- Node.js 18+
+- PostgreSQL database (or Neon DB URI)
 - Google Gemini API key
+- Google Cloud Console Client ID (for OAuth)
 
-### Installation
-
-1. **Clone the repository:**
+### 1. Installation
+Clone the repository and install dependencies concurrently using the root package.json:
 ```bash
 git clone <repository-url>
 cd ai-resume-builder
-```
-
-2. **Install all dependencies:**
-```bash
 npm run install:all
 ```
 
-3. **Set up environment variables:**
+### 2. Environment Variables
 
 Create `backend/.env`:
 ```env
-DATABASE_URL="postgresql://username:password@localhost:5432/ai_resume_builder?schema=public"
+DATABASE_URL="postgresql://username:password@localhost:5432/ai_resume_builder?sslmode=require"
 GEMINI_API_KEY=your_gemini_api_key_here
-PORT=5000
+PORT=5001
+CORS_ORIGINS=http://localhost:3000
+JWT_SECRET=a_secure_random_string
+JWT_EXPIRES_IN=7d
+GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
-Create `frontend/.env.local`:
+Create `frontend/.env` (or `.env.local`):
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:5000
+NEXT_PUBLIC_API_URL=http://localhost:5001
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
-4. **Set up the database:**
+### 3. Database Setup
+Navigate into the backend and push the Prisma schema:
 ```bash
-npm run db:migrate
-npm run db:generate
+cd backend
+npx prisma db push
+npx prisma generate
+cd ..
 ```
 
-5. **Start the development servers:**
+### 4. Running Both Servers Locally
+The project is configured with `concurrently` in the root `package.json` to make running both servers incredibly easy.
+
+**Option A: One Command (Recommended)**
+Open a terminal in the **root** folder (`ai-resume-builder/`) and run:
 ```bash
 npm run dev
 ```
+*This spins up the Express backend on Port 5001 and the Next.js frontend on Port 3000 simultaneously.*
 
-This will start both the backend server (port 5001) and frontend client (port 3000).
+**Option B: Separate Terminals**
+If you prefer seeing the logs separated:
+1. Open Terminal 1: `cd backend && npm run dev`
+2. Open Terminal 2: `cd frontend && npm run dev`
+
+---
 
 ## 📚 API Documentation
 
-### AI Endpoints
+### Auth & User Endpoints
+- `POST /api/auth/signup` - Traditional email/password registration.
+- `POST /api/auth/login` - Standard login returning a JWT.
+- `POST /api/auth/google` - **Google OAuth Flow:** Accepts a Google ID token, verifies it directly with Google servers, creates a user if they don't exist, and returns a unified custom JWT.
+- `GET /api/auth/me` - Verifies the JWT and returns the current user.
 
-#### POST `/api/generate-bullet`
-Transform raw job descriptions into professional bullet points.
+### AI Endpoints (Rate Limited)
 
-**Request:**
-```json
-{
-  "rawInput": "I fixed bugs and worked on features",
-  "targetJobTitle": "Senior Software Engineer"
-}
-```
+- **`POST /api/parse-pdf`**
+  - **Logic**: Accepts a `multipart/form-data` PDF file. Multer stores it securely in memory (no disk writes). The buffer is sent to Gemini to extract all text into structured JSON.
 
-**Response:**
-```json
-{
-  "success": true,
-  "bullets": [
-    "Resolved 50+ critical software bugs, improving system uptime by 15%",
-    "Developed and deployed 8 new features that increased user engagement by 25%",
-    "Collaborated with cross-functional teams to deliver projects 20% ahead of schedule"
-  ]
-}
-```
+- **`POST /api/interview-prep`**
+  - **Logic**: Analyzes the parsed resume JSON against an optional job description. Returns 5 highly specific interview questions and answering tips.
 
-#### POST `/api/generate-summary`
-Generate a professional summary based on user data.
+- **`POST /api/analyze-ats`**
+  - **Logic**: Compares the user's resume data against a target job description, generating a strict match score (0-100) based on keyword overlap.
 
-**Request:**
-```json
-{
-  "experiences": [...],
-  "skills": ["React", "Node.js", "Python"],
-  "targetJobTitle": "Full Stack Developer"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "summary": "Results-driven Full Stack Developer with 5+ years of experience..."
-}
-```
+- **`POST /api/generate-bullet`** & **`POST /api/enhance-bullet`**
+  - **Logic**: Rewrites user input into compelling, metric-driven bullet points using the STAR method without using buzzwords.
 
 ### Resume CRUD Endpoints
+- `GET /api/resumes/me` - Fetch the user's resume data.
+- `PUT /api/resumes/save` - Auto-save the complete resume document directly to the cloud.
 
-- `GET /api/resumes?userId={id}` - Get all resumes for a user
-- `GET /api/resumes/:id` - Get single resume
-- `POST /api/resumes` - Create new resume
-- `PUT /api/resumes/:id` - Update resume
-- `DELETE /api/resumes/:id` - Delete resume
+---
 
-### Experience Endpoints
+## 📝 User Flow & Architecture Explained
 
-- `POST /api/resumes/:id/experiences` - Add experience
-- `PUT /api/resumes/:id/experiences/:expId` - Update experience
-- `DELETE /api/resumes/:id/experiences/:expId` - Delete experience
+1. **Authentication Layer**: Users arrive and can sign in via standard email/password or seamless Google One-Tap Login. A JWT is securely stored in `localStorage`.
+2. **Onboarding (PDF Parsing)**: Instead of manually typing out a 5-page resume, users drag-and-drop their existing PDF. The Express backend buffers the file in memory, utilizes Gemini Vision/Text to structure the data, and pre-fills the React state instantly.
+3. **Data Refinement**: Users navigate through Personal Info, Experience, Education, and Skills. The AI acts as a co-pilot, actively rewriting bullet points to be "ATS-Friendly".
+4. **ATS & Interview Mode**: Users paste a target job description. The app calculates their match score, highlights missing keywords, and automatically generates an interactive Interview Prep modal with predicted recruiter questions.
+5. **Live Export**: As the user modifies data, a live iframe/component reflects the changes. `html2pdf.js` captures the DOM tree of the chosen template and exports a high-fidelity PDF.
 
-### Education Endpoints
-
-- `POST /api/resumes/:id/educations` - Add education
-- `DELETE /api/resumes/:id/educations/:eduId` - Delete education
-
-### Skills Endpoints
-
-- `POST /api/resumes/:id/skills` - Add skill
-- `DELETE /api/resumes/:id/skills/:skillId` - Delete skill
-
-## 🎨 Templates
-
-### Classic
-Traditional, professional layout with:
-- Centered header with contact information
-- Clear section dividers
-- Serif typography
-- ATS-optimized formatting
-
-### Modern
-Contemporary design featuring:
-- Color accent header
-- Visual timeline for experience
-- Sans-serif typography
-- Modern card-based layout
-
-### Minimal
-Clean, elegant design with:
-- Generous whitespace
-- Light typography
-- Subtle styling
-- Focus on content
-
-## 🤖 AI Prompting Strategy
-
-### Bullet Point Generation
-System Prompt:
-```
-You are an expert executive resume writer. Your goal is to take the user's 
-raw job description and rewrite it into three distinct, highly professional 
-bullet points. Use strong action verbs, emphasize quantifiable metrics, 
-and ensure the tone is objective and ATS-friendly. Do not use buzzwords. 
-Return only the three bullet points in a JSON array.
-```
-
-### Summary Generation
-System Prompt:
-```
-You are an expert executive resume writer. Create a compelling 3-4 sentence 
-professional summary based on the user's experience, skills, and target 
-job title. Focus on key achievements, years of experience, and core 
-competencies. Make it ATS-friendly with relevant keywords.
-```
+---
 
 ## 📁 Project Structure
 
-```
+```text
 ai-resume-builder/
-├── frontend/               # Next.js frontend
+├── frontend/               # Next.js 14 App Router
 │   ├── src/
-│   │   ├── app/           # Next.js app router
-│   │   ├── components/    # React components
-│   │   └── lib/           # API utilities
-│   ├── package.json
-│   └── tailwind.config.js
-├── backend/                # Express backend
-│   ├── routes/            # API routes
-│   ├── services/          # Business logic
-│   ├── prisma/            # Database schema
-│   ├── index.js           # Server entry
+│   │   ├── app/            # Pages (login, signup, build)
+│   │   ├── components/     # Reusable UI & Forms (Tailwind)
+│   │   ├── contexts/       # React Context (Auth)
+│   │   └── lib/            # Axios API utilities
+│   ├── .env
 │   └── package.json
-├── package.json           # Root workspace config
-└── README.md
+├── backend/                # Express API
+│   ├── middleware/         # JWT Verification & Rate Limiters
+│   ├── prisma/             # PostgreSQL Schema & Migrations
+│   ├── routes/             # Express Routers (ai, auth, resumes)
+│   ├── services/           # Gemini API Logic
+│   ├── index.js            # Server Entry Point
+│   ├── .env
+│   └── package.json
+└── package.json            # Root Concurrently Scripts
 ```
-
-## 🛠️ Development Scripts
-
-- `npm run install:all` - Install dependencies for all packages
-- `npm run dev` - Start both backend and frontend in development mode
-- `npm run dev:backend` - Start only the backend server
-- `npm run dev:frontend` - Start only the frontend client
-- `npm run db:migrate` - Run database migrations
-- `npm run db:studio` - Open Prisma Studio
-
-## 🔒 Environment Variables
-
-### Backend (.env)
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `GEMINI_API_KEY` | Google Gemini API key | Yes |
-| `PORT` | Server port (default: 5000) | No |
-| `CORS_ORIGINS` | Allowed CORS origins | No |
-
-### Frontend (.env.local)
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `NEXT_PUBLIC_API_URL` | Backend API URL | Yes |
-
-## 📝 User Flow
-
-1. **Landing Page** → User clicks "Build Your Resume"
-2. **Personal Info** → Enter contact details and target job title
-3. **Experience** → Add work history with AI enhancement
-4. **Education** → Add academic background
-5. **Skills** → Add technical and soft skills
-6. **Preview** → Select template and review final resume
-7. **Export** → Download as PDF
-
-## 🎯 Key Features Explained
-
-### AI Enhancement Workflow
-1. User enters raw job description
-2. Clicks "Enhance with AI" button
-3. Backend sends prompt to Gemini API
-4. AI returns 3 optimized bullet points
-5. User reviews and accepts/rejects each suggestion
-6. Accepted bullets added to resume
-
-### Real-Time Preview
-- Live updates as user types
-- Three template options
-- Responsive layout preview
-- Print-ready formatting
-
-### PDF Generation
-- Client-side generation using html2pdf.js
-- A4 format output
-- High-quality rendering
-- Template-specific styling preserved
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## 📄 License
-
-MIT License - feel free to use this project for personal or commercial purposes.
-
-## 🙏 Acknowledgments
-
-- Google Gemini AI for powering the content enhancement
-- Tailwind CSS for the beautiful styling
-- Next.js team for the excellent React framework
-- Prisma for the type-safe database client
 
 ---
 
 **Built with ❤️ to help job seekers land their dream jobs!**
-
