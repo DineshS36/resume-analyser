@@ -7,7 +7,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Read the origins from the environment variable and split them into an array
+// Fallback to localhost if the variable is missing (for local dev safety)
+const allowedOrigins = process.env.CORS_ORIGINS 
+  ? process.env.CORS_ORIGINS.split(',') 
+  : ['http://localhost:3000'];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true // Keep this if your app uses cookies or sessions
+}));
 app.use(express.json());
 
 // Import routes
